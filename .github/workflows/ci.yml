@@ -79,6 +79,20 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: freebsd-pkg, path: dist }
       - run: sudo apt-get update && sudo apt-get install -y xorriso
-      - run: sh iso/build-iso.sh -p "$(ls dist/bsdswitch-*.pkg | head -1)" -v 15.1 -o dist
+      - run: sudo sh iso/build-iso.sh -p "$(ls dist/bsdswitch-*.pkg | head -1)" -v 15.1 -o dist
+      - name: boot smoke test (UEFI, QEMU)
+        run: |
+          sudo apt-get install -y qemu-system-x86 ovmf
+          sudo chmod a+r dist/*.iso
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
+          timeout 240 qemu-system-x86_64 -m 2048 -nographic -no-reboot \
+            -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
+            -drive if=pflash,format=raw,file=vars.fd \
+            -cdrom dist/*.iso -serial mon:stdio > boot.log 2>&1 || true
+          grep -a -E 'FreeBSD|Loading kernel|bsdinstall' boot.log | head -20
+          grep -a -q -E 'FreeBSD' boot.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: boot-log, path: boot.log }
       - uses: actions/upload-artifact@v4
         with: { name: bsdswitch-iso, path: dist/*.iso, compression-level: 0 }

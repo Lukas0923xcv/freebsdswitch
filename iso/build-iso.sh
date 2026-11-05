@@ -113,12 +113,39 @@ ISO=$OUT/bsdswitch-$BSWVER-freebsd$VER-$ARCH.iso
 
 # ---- 3. remaster the ISO ---------------------------------------------------------------
 if have xorriso; then
-	msg "remastering ISO with xorriso (boot records replayed from the original)"
+	# The FreeBSD ISO's El Torito images are not files in the ISO tree,
+	# so they cannot simply be replayed: extract the tree and the boot
+	# images, add the payload and build a new ISO with explicit BIOS
+	# (cdboot) and UEFI (FAT image) boot entries.
+	msg "remastering ISO with xorriso"
+	ROOT=$WORK/root
+	rm -rf "$ROOT" "$WORK/bootimg"
+	mkdir -p "$ROOT" "$WORK/bootimg"
+	[ "$(id -u)" = 0 ] || echo "note: not root, files on the ISO will not be owned by root (run with sudo)"
+	xorriso -osirrox on -indev "$WORK/$NAME-disc1.iso" -extract / "$ROOT" >/dev/null 2>&1
+	chmod -R u+w "$ROOT"
+	xorriso -osirrox on -indev "$WORK/$NAME-disc1.iso" -extract_boot_images "$WORK/bootimg/" 2>&1 | grep -v '^xorriso : UPDATE' || true
+	EFIIMG=$(ls "$WORK"/bootimg/*uefi* 2>/dev/null | head -1)
+	[ -n "$EFIIMG" ] || { echo "no UEFI boot image found in the original ISO"; ls -l "$WORK/bootimg"; exit 1; }
+	cp "$EFIIMG" "$ROOT/boot/bsdswitch-efiboot.img"
+	cp -R "$PAY/bsdswitch" "$ROOT/"
+	cp "$PAY/etc/installerconfig" "$ROOT/etc/installerconfig"
+	LABEL=$(awk '$2 == "/" { sub("/dev/iso9660/", "", $1); print $1 }' "$ROOT/etc/fstab")
+	[ -n "$LABEL" ] || { echo "cannot determine the volume label from /etc/fstab"; exit 1; }
 	rm -f "$ISO"
-	xorriso -indev "$WORK/$NAME-disc1.iso" -outdev "$ISO" \
-		-boot_image any replay \
-		-map "$PAY/bsdswitch" /bsdswitch \
-		-map "$PAY/etc/installerconfig" /etc/installerconfig
+	if [ "$ARCH" = amd64 ]; then
+		LOADSZ=$(( ($(wc -c < "$ROOT/boot/cdboot") + 511) / 512 ))
+		xorriso -as mkisofs -o "$ISO" -V "$LABEL" -R -publisher bsdswitch \
+			-c boot/boot.catalog \
+			-b boot/cdboot -no-emul-boot -boot-load-size "$LOADSZ" \
+			-eltorito-alt-boot -e boot/bsdswitch-efiboot.img -no-emul-boot \
+			"$ROOT"
+	else
+		xorriso -as mkisofs -o "$ISO" -V "$LABEL" -R -publisher bsdswitch \
+			-c boot/boot.catalog -e boot/bsdswitch-efiboot.img -no-emul-boot "$ROOT"
+	fi
+	msg "boot records of the new ISO"
+	xorriso -indev "$ISO" -report_el_torito plain 2>/dev/null | grep -i -E 'El Torito|boot img'
 elif [ "$(uname -s)" = FreeBSD ]; then
 	msg "remastering ISO with makefs (base system tools)"
 	ROOT=$WORK/root
