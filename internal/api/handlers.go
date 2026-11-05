@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"errors"
 	"fmt"
 	"io"
@@ -96,6 +98,10 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.opt.Auth.ChangeOwnPassword(sess.User, req.Old, req.New)
 	s.audit(r, "password-change", "", err)
+	if err == nil && s.opt.StateDir != "" {
+		// the one-time password shown on the console is no longer valid
+		os.Remove(filepath.Join(s.opt.StateDir, "initial-admin-password"))
+	}
 	if err != nil {
 		if errors.Is(err, auth.ErrBadCredentials) {
 			writeErr(w, 403, errors.New("current password is wrong"))
