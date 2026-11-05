@@ -130,3 +130,16 @@ func TestPolicyRejects(t *testing.T) {
 	}
 	_ = strings.TrimSpace
 }
+
+func TestPolicyEpairNames(t *testing.T) {
+	for _, a := range [][]string{
+		{"ifconfig", "epair0a", "inet", "192.0.2.1/24", "alias"},
+		{"ifconfig", "bridge77", "addm", "epair1a", "untagged", "10"},
+		{"pkill", "-f", "dhclient: epair0a"},
+		{"sysrc", "ifconfig_epair0a=inet 192.0.2.1/24"},
+	} {
+		if err := CheckOp(backend.Op{Argv: a}); err != nil {
+			t.Errorf("%v: %v", a, err)
+		}
+	}
+}

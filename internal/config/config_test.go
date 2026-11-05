@@ -269,3 +269,16 @@ func TestDefaultValid(t *testing.T) {
 		t.Fatal("defaults")
 	}
 }
+
+func TestInterfaceNames(t *testing.T) {
+	for _, ok := range []string{"em0", "vtnet12", "epair0a", "epair12b", "uplink", "ix0", "lagg0"} {
+		if !ValidIfName(ok) {
+			t.Errorf("%s should be valid", ok)
+		}
+	}
+	for _, bad := range []string{"", "0em", "em0;id", "Em0", "a234567890123456", "em 0", "-x"} {
+		if ValidIfName(bad) {
+			t.Errorf("%q should be invalid", bad)
+		}
+	}
+}

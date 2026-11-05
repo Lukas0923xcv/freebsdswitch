@@ -43,7 +43,9 @@ type Inventory interface {
 }
 
 var (
-	ifNameRe   = regexp.MustCompile(`^[a-z][a-z0-9_]{0,10}[0-9]+$`)
+	// FreeBSD interface names: up to 15 characters (IFNAMSIZ 16), e.g. em0,
+	// epair0a, or renamed ones like "uplink".
+	ifNameRe   = regexp.MustCompile(`^[a-z][a-z0-9_]{0,14}$`)
 	hostnameRe = regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`)
 	domainRe   = regexp.MustCompile(`^([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)*[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`)
 	vlanNameRe = regexp.MustCompile(`^[A-Za-z0-9_.\- ]{0,32}$`)

@@ -33,11 +33,11 @@ var Programs = map[string]string{
 }
 
 var (
-	ifRe       = `[a-z][a-z0-9_]{0,10}[0-9]+(\.[0-9]{1,4})?`
+	ifRe       = `[a-z][a-z0-9_]{0,14}(\.[0-9]{1,4})?`
 	ifOnlyRe   = regexp.MustCompile(`^` + ifRe + `$`)
 	argRe      = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./\-<> ()\[\]]*$`)
 	descRe     = regexp.MustCompile(`^[^\x00-\x1f"'\\` + "`" + `$;|&<>]{0,64}$`)
-	sysrcKeyRe = regexp.MustCompile(`^(ifconfig_` + ifRe + `(_ipv6|_alias[0-9]+)?|ifconfig_` + `[a-z][a-z0-9_]{0,10}[0-9]+_[0-9]+(_ipv6)?|defaultrouter|ipv6_defaultrouter|ipv6_activate_all_interfaces|hostname|sshd_enable|sshd_flags|ntpd_enable|ntpd_sync_on_start|bsnmpd_enable|lldpd_enable|pf_enable|pf_rules|dummynet_enable|syslogd_flags|cloned_interfaces|bsdswitchd_enable)$`)
+	sysrcKeyRe = regexp.MustCompile(`^(ifconfig_` + ifRe + `(_ipv6|_alias[0-9]+)?|ifconfig_` + `[a-z][a-z0-9_]{0,14}_[0-9]+(_ipv6)?|defaultrouter|ipv6_defaultrouter|ipv6_activate_all_interfaces|hostname|sshd_enable|sshd_flags|ntpd_enable|ntpd_sync_on_start|bsnmpd_enable|lldpd_enable|pf_enable|pf_rules|dummynet_enable|syslogd_flags|cloned_interfaces|bsdswitchd_enable)$`)
 	services   = map[string]bool{"sshd": true, "ntpd": true, "bsnmpd": true, "lldpd": true, "syslogd": true, "pf": true, "dhclient": true, "bsdswitchd": true}
 	svcActions = map[string]bool{"start": true, "stop": true, "restart": true, "reload": true, "onestart": true, "onestop": true, "onerestart": true, "status": true}
 )
