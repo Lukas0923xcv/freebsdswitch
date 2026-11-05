@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -550,11 +551,7 @@ func Save(path string, c *Config) error {
 // WriteFileAtomic writes data to a temp file in the same dir, fsyncs and
 // renames it over path.
 func WriteFileAtomic(path string, data []byte, perm os.FileMode) error {
-	dir := path[:strings.LastIndex(path, "/")+1]
-	if dir == "" {
-		dir = "."
-	}
-	f, err := os.CreateTemp(dir, ".tmp-*")
+	f, err := os.CreateTemp(filepath.Dir(path), ".tmp-*")
 	if err != nil {
 		return err
 	}

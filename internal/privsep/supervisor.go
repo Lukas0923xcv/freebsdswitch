@@ -75,7 +75,7 @@ func Supervise(ctx context.Context, cfg SupervisorConfig) error {
 		cmd.ExtraFiles = files
 		cmd.Env = []string{"PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin",
 			"BSDSWITCH_LISTEN_FDS=" + names, "BSDSWITCH_PRIVD_SOCK=" + cfg.Socket, "HOME=/nonexistent"}
-		cmd.SysProcAttr = &syscall.SysProcAttr{Credential: &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}, Setpgid: true}
+		cmd.SysProcAttr = dropPrivileges(uid, gid)
 		start := time.Now()
 		if err := cmd.Start(); err != nil {
 			return fmt.Errorf("start daemon: %w", err)
