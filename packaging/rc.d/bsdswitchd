@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# PROVIDE: bsdswitchd
+# REQUIRE: NETWORKING syslogd
+# BEFORE: LOGIN sshd
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf to enable bsdswitch:
+#
+# bsdswitchd_enable="YES"
+#
+# bsdswitchd_flags (str):  extra flags for bsdswitch-privd
+#                          (e.g. "-config-dir /usr/local/etc/bsdswitch")
+#
+# Process layout:
+#   daemon(8) (restarts on crash)
+#     `- bsdswitch-privd (root: binds :443/:80, runs allowlisted commands)
+#          `- bsdswitchd (user _bsdswitch: REST API, web UI, config engine)
+
+. /etc/rc.subr
+
+name="bsdswitchd"
+rcvar="bsdswitchd_enable"
+
+load_rc_config $name
+
+: ${bsdswitchd_enable:="NO"}
+: ${bsdswitchd_flags:=""}
+
+pidfile="/var/run/${name}.pid"
+procname="/usr/sbin/daemon"
+command="/usr/sbin/daemon"
+command_args="-r -R 5 -P ${pidfile} -S -T bsdswitchd /usr/local/libexec/bsdswitch-privd ${bsdswitchd_flags}"
+# the flags belong to privd, not to daemon(8)
+flags=""
+
+start_precmd="${name}_prestart"
+
+bsdswitchd_prestart()
+{
+	for m in if_bridge bridgestp if_lagg; do
+		kldstat -q -m ${m} || kldload -n ${m} 2>/dev/null
+	done
+	install -d -o root -g _bsdswitch -m 0770 /var/run/bsdswitch
+}
+
+run_rc_command "$1"

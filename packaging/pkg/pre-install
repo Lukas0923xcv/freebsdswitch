@@ -1,0 +1,8 @@
+#!/bin/sh
+# create the unprivileged daemon user
+if ! pw groupshow _bsdswitch >/dev/null 2>&1; then
+	pw groupadd _bsdswitch -g 887
+fi
+if ! pw usershow _bsdswitch >/dev/null 2>&1; then
+	pw useradd _bsdswitch -u 887 -g _bsdswitch -c "bsdswitch daemon" -d /nonexistent -s /usr/sbin/nologin
+fi

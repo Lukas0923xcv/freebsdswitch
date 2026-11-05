@@ -1,0 +1,42 @@
+# bsdswitch example configuration (/usr/local/etc/bsdswitch/config.yaml)
+#
+# Management on vtnet0 (outside the bridge), switch ports vtnet1-vtnet4,
+# VLANs 1, 10 and 20, vtnet4 is a trunk (native VLAN 1, tagged 10 and 20).
+# Normally you never edit this file by hand: use the web UI, bsdswitchctl
+# or the console menu. If you do, run `bsdswitchctl configure -f` /
+# System > Configuration > Edit as YAML, or restart bsdswitchd.
+version: 1
+system:
+  hostname: sw01
+  domain: lab.example
+  timezone: Europe/Vienna
+  dns: [192.168.1.1]
+  ntp: [pool.ntp.org]
+management:
+  interface: vtnet0
+  ipv4: { mode: static, address: 192.168.1.10/24, gateway: 192.168.1.1 }
+  ipv6: { mode: slaac }
+  inband:                     # optional: web UI also reachable in VLAN 99
+    enabled: false
+  allowed_subnets: []         # e.g. [192.168.1.0/24]; empty = any
+  ssh: { enabled: true, password_auth: true, port: 22 }
+  https_port: 443
+  http_port: 80               # redirects to HTTPS
+  session_timeout: 30         # minutes
+bridge:
+  name: bridge0
+  mac_aging: 300
+  max_addresses: 2000
+  mtu: 1500                   # one MTU for all ports (if_bridge limitation)
+  stp: { enabled: true, mode: rstp, priority: 32768, hello: 2, max_age: 20, fwd_delay: 15 }
+vlans:
+  - { id: 1, name: default }
+  - { id: 10, name: office }
+  - { id: 20, name: iot }
+ports:
+  - { name: vtnet1, description: PC-1, mode: access, pvid: 1, stp: { edge: true } }
+  - { name: vtnet2, description: PC-2, mode: access, pvid: 10, stp: { edge: true } }
+  - { name: vtnet3, description: Camera, mode: access, pvid: 20, stp: { edge: true }, max_addresses: 2 }
+  - { name: vtnet4, description: Uplink, mode: trunk, native: 1, tagged: "10,20" }
+static_macs:
+  - { mac: "00:11:22:33:44:55", port: vtnet1, vlan: 1 }

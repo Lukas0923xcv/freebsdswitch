@@ -1,0 +1,18 @@
+[
+{ type: install
+  message: <<EOM
+bsdswitch has been installed.
+
+Enable and start it:
+
+  sysrc bsdswitchd_enable=YES
+  service bsdswitchd start
+
+Then log in on the console (or run bsdswitch-console) to run the first-boot
+wizard. It prints the web UI URL and a one-time admin password.
+
+To make the console menu appear when root logs in on the console, run
+  /usr/local/share/bsdswitch/install.sh --console-only
+EOM
+}
+]

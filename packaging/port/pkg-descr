@@ -1,0 +1,8 @@
+bsdswitch turns a FreeBSD machine into a managed Ethernet switch, similar
+in spirit to how pfSense turns FreeBSD into a firewall appliance.
+
+Forwarding stays in the kernel (if_bridge with VLAN filtering, FreeBSD
+15.0+). bsdswitch is the management and control plane: a pfSense-style
+console menu, an HTTPS web UI, a Cisco-flavoured CLI (bsdswitchctl) and a
+REST API, with staged changes, Junos-style commit-confirm, automatic
+rollback and running/startup configurations.

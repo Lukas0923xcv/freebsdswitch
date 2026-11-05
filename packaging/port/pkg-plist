@@ -1,0 +1,8 @@
+sbin/bsdswitch
+sbin/bsdswitchd
+sbin/bsdswitchctl
+sbin/bsdswitch-console
+libexec/bsdswitch-privd
+share/bsdswitch/install.sh
+share/bsdswitch/config.yaml.sample
+share/doc/bsdswitch/README.md

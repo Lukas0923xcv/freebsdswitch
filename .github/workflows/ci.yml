@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: unit, API and web UI tests (simulator)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.24' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: web UI build is up to date
+        run: |
+          make web
+          git diff --exit-code -- internal/webui/dist || (echo "run 'make web' and commit internal/webui/dist"; exit 1)
+      - run: make test
+      - run: make freebsd
+      - name: Playwright e2e
+        run: |
+          cd tests/e2e && npm ci && npx playwright install --with-deps chromium && cd ../..
+          make e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-results, path: tests/e2e/test-results }
+      - uses: actions/upload-artifact@v4
+        with: { name: freebsd-binaries, path: build/bsdswitch-freebsd-* }
+
+  freebsd:
+    name: integration tests + package (FreeBSD 15.1 VM)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: '15.1'
+          usesh: true
+          prepare: |
+            pkg install -y go124 git-tiny gmake
+            ln -sf /usr/local/bin/go124 /usr/local/bin/go || true
+          run: |
+            set -e
+            git config --global --add safe.directory "$PWD"
+            gmake build
+            gmake lab-test
+            gmake pkg
+      - uses: actions/upload-artifact@v4
+        with: { name: freebsd-pkg, path: dist/*.pkg }
+
+  iso:
+    name: installer ISO
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: freebsd
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: freebsd-pkg, path: dist }
+      - run: sudo apt-get update && sudo apt-get install -y xorriso
+      - run: sh iso/build-iso.sh -p "$(ls dist/bsdswitch-*.pkg | head -1)" -v 15.1 -o dist
+      - uses: actions/upload-artifact@v4
+        with: { name: bsdswitch-iso, path: dist/*.iso }
