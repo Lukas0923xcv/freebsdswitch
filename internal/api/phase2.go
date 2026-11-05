@@ -48,12 +48,12 @@ func (s *Server) phase2Routes() {
 
 type LAGView struct {
 	config.LAG
-	Exists  bool              `json:"exists"`
-	Up      bool              `json:"up"`
-	Proto   string            `json:"oper_proto"`
-	Ports   []LAGMemberStatus `json:"ports"`
-	LACP    string            `json:"lacp_id"`
-	Port    *config.Port      `json:"port"`
+	Exists bool              `json:"exists"`
+	Up     bool              `json:"up"`
+	Proto  string            `json:"oper_proto"`
+	Ports  []LAGMemberStatus `json:"ports"`
+	LACP   string            `json:"lacp_id"`
+	Port   *config.Port      `json:"port"`
 }
 
 type LAGMemberStatus struct {
@@ -540,12 +540,12 @@ var pkgNameRe = regexp.MustCompile(`^bsdswitch-[0-9A-Za-z._,\-]+\.pkg$`)
 func (s *Server) updateDir() string { return filepath.Join(s.opt.StateDir, "update") }
 
 type updateStatus struct {
-	Current      string `json:"current"`
-	Uploaded     string `json:"uploaded"`
-	BootEnvs     bool   `json:"boot_environments"`
-	LastBE       string `json:"last_be"`
-	RepoVersion  string `json:"repo_version"`
-	Message      string `json:"message"`
+	Current     string `json:"current"`
+	Uploaded    string `json:"uploaded"`
+	BootEnvs    bool   `json:"boot_environments"`
+	LastBE      string `json:"last_be"`
+	RepoVersion string `json:"repo_version"`
+	Message     string `json:"message"`
 }
 
 func (s *Server) updateStatus(ctx context.Context) updateStatus {

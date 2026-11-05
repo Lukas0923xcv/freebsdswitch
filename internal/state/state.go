@@ -39,7 +39,7 @@ type Interface struct {
 	Lagg *Lagg `json:"lagg,omitempty"`
 }
 
-func (i *Interface) HasFlag(f string) bool  { return has(i.Flags, f) }
+func (i *Interface) HasFlag(f string) bool   { return has(i.Flags, f) }
 func (i *Interface) HasOption(o string) bool { return has(i.Options, o) }
 func (i *Interface) HasCap(o string) bool {
 	return has(i.Capabilities, o) || has(i.Options, o)
@@ -195,28 +195,28 @@ func (b *Bridge) Member(name string) *Member {
 
 // Member is one bridge member port.
 type Member struct {
-	Name      string         `json:"name"`
-	Flags     []string       `json:"flags"`
-	IfMaxAddr int            `json:"ifmaxaddr"`
-	PortNo    int            `json:"port_no"`
-	Priority  int            `json:"priority"`
-	PathCost  int            `json:"path_cost"`
-	Proto     string         `json:"proto"`
-	Role      string         `json:"role"`
-	State     string         `json:"state"`
-	VLANProto string         `json:"vlan_proto"`
-	Untagged  int            `json:"untagged"`
-	Tagged    config.VIDSet  `json:"tagged"`
+	Name      string        `json:"name"`
+	Flags     []string      `json:"flags"`
+	IfMaxAddr int           `json:"ifmaxaddr"`
+	PortNo    int           `json:"port_no"`
+	Priority  int           `json:"priority"`
+	PathCost  int           `json:"path_cost"`
+	Proto     string        `json:"proto"`
+	Role      string        `json:"role"`
+	State     string        `json:"state"`
+	VLANProto string        `json:"vlan_proto"`
+	Untagged  int           `json:"untagged"`
+	Tagged    config.VIDSet `json:"tagged"`
 }
 
 func (m *Member) Has(f string) bool { return has(m.Flags, f) }
 
 // Lagg is lagg(4) state.
 type Lagg struct {
-	Proto   string       `json:"proto"`
-	Hash    string       `json:"hash"`
-	Ports   []LaggPort   `json:"ports"`
-	LACP    string       `json:"lacp,omitempty"`
+	Proto string     `json:"proto"`
+	Hash  string     `json:"hash"`
+	Ports []LaggPort `json:"ports"`
+	LACP  string     `json:"lacp,omitempty"`
 }
 
 type LaggPort struct {

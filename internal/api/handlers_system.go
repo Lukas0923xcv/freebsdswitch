@@ -2,9 +2,9 @@ package api
 
 import (
 	"bufio"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"

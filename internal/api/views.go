@@ -175,24 +175,24 @@ func (s *Server) portView(run, cand *config.Config, snap *state.Snapshot, br *st
 
 // InterfaceView is one detected NIC on the assignment page.
 type InterfaceView struct {
-	Name          string   `json:"name"`
-	Driver        string   `json:"driver"`
-	MAC           string   `json:"mac"`
-	Role          string   `json:"role"` // management, port, lag-member, mirror, unused
-	Exists        bool     `json:"exists"`
-	Physical      bool     `json:"physical"`
-	LinkUp        bool     `json:"link_up"`
-	AdminUp       bool     `json:"admin_up"`
-	Speed         string   `json:"speed"`
-	Media         string   `json:"media"`
-	MTU           int      `json:"mtu"`
-	SpeedSettable bool     `json:"speed_settable"`
+	Name           string   `json:"name"`
+	Driver         string   `json:"driver"`
+	MAC            string   `json:"mac"`
+	Role           string   `json:"role"` // management, port, lag-member, mirror, unused
+	Exists         bool     `json:"exists"`
+	Physical       bool     `json:"physical"`
+	LinkUp         bool     `json:"link_up"`
+	AdminUp        bool     `json:"admin_up"`
+	Speed          string   `json:"speed"`
+	Media          string   `json:"media"`
+	MTU            int      `json:"mtu"`
+	SpeedSettable  bool     `json:"speed_settable"`
 	SupportedMedia []string `json:"supported_media"`
-	Capabilities  []string `json:"capabilities"`
-	Options       []string `json:"options"`
-	IPv4          []string `json:"ipv4"`
-	IPv6          []string `json:"ipv6"`
-	Notes         []string `json:"notes"`
+	Capabilities   []string `json:"capabilities"`
+	Options        []string `json:"options"`
+	IPv4           []string `json:"ipv4"`
+	IPv6           []string `json:"ipv6"`
+	Notes          []string `json:"notes"`
 }
 
 func (s *Server) interfaceViews(ctx context.Context) ([]InterfaceView, error) {
@@ -275,33 +275,33 @@ func sortIfaces(v []InterfaceView) {
 // SystemView is the dashboard system panel.
 type SystemView struct {
 	backend.SysInfo
-	Version       string         `json:"version"`
-	Commit        string         `json:"commit"`
-	Management    MgmtView       `json:"management"`
-	Config        ConfigStatus   `json:"config"`
-	PortsTotal    int            `json:"ports_total"`
-	PortsUp       int            `json:"ports_up"`
-	VLANCount     int            `json:"vlan_count"`
-	STPRoot       bool           `json:"stp_root"`
-	Bridge        string         `json:"bridge"`
+	Version    string       `json:"version"`
+	Commit     string       `json:"commit"`
+	Management MgmtView     `json:"management"`
+	Config     ConfigStatus `json:"config"`
+	PortsTotal int          `json:"ports_total"`
+	PortsUp    int          `json:"ports_up"`
+	VLANCount  int          `json:"vlan_count"`
+	STPRoot    bool         `json:"stp_root"`
+	Bridge     string       `json:"bridge"`
 }
 
 type MgmtView struct {
-	Interface string   `json:"interface"`
-	Addresses []string `json:"addresses"`
-	InBand    string   `json:"inband"`
+	Interface       string   `json:"interface"`
+	Addresses       []string `json:"addresses"`
+	InBand          string   `json:"inband"`
 	InBandAddresses []string `json:"inband_addresses"`
-	URLs      []string `json:"urls"`
-	LinkUp    bool     `json:"link_up"`
-	MAC       string   `json:"mac"`
-	SSH       bool     `json:"ssh"`
+	URLs            []string `json:"urls"`
+	LinkUp          bool     `json:"link_up"`
+	MAC             string   `json:"mac"`
+	SSH             bool     `json:"ssh"`
 }
 
 type ConfigStatus struct {
-	StartupDiffers bool        `json:"startup_differs"`
-	Staged         bool        `json:"staged"`
+	StartupDiffers bool         `json:"startup_differs"`
+	Staged         bool         `json:"staged"`
 	Pending        *PendingView `json:"pending"`
-	BootMode       string      `json:"boot_mode"`
+	BootMode       string       `json:"boot_mode"`
 }
 
 type PendingView struct {

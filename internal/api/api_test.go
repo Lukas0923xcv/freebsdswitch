@@ -24,13 +24,13 @@ import (
 func init() { auth.BcryptCost = 4 }
 
 type env struct {
-	t      *testing.T
-	srv    *httptest.Server
-	api    *Server
-	sim    *mock.Sim
-	eng    *commit.Engine
-	am     *auth.Manager
-	col    *stats.Collector
+	t       *testing.T
+	srv     *httptest.Server
+	api     *Server
+	sim     *mock.Sim
+	eng     *commit.Engine
+	am      *auth.Manager
+	col     *stats.Collector
 	adminPW string
 }
 
@@ -67,7 +67,9 @@ func newEnv(t *testing.T) *env {
 	col.Poll(context.Background())
 	s := New(Options{Engine: eng, Auth: am, Stats: col, Backend: sim, Logs: logbuf.New(100, nil),
 		StateDir: dir + "/db", Diag: fakeDiag{}, Sim: sim, InsecureCookies: true,
-		Factory: func(ctx context.Context) (*config.Config, error) { return config.Default("vtnet0", []string{"vtnet1"}), nil }})
+		Factory: func(ctx context.Context) (*config.Config, error) {
+			return config.Default("vtnet0", []string{"vtnet1"}), nil
+		}})
 	ts := httptest.NewServer(s)
 	t.Cleanup(ts.Close)
 	return &env{t: t, srv: ts, api: s, sim: sim, eng: eng, am: am, col: col, adminPW: pw}

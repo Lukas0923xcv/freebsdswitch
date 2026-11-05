@@ -41,7 +41,9 @@ func setup(t *testing.T, input string) *env {
 	pw, _ := am.EnsureAdmin()
 	os.WriteFile(dir+"/db/initial-admin-password", []byte(pw+"\n"), 0o600)
 	srv := api.New(api.Options{Engine: eng, Auth: am, Stats: stats.New(sim), Backend: sim, Logs: logbuf.New(10, nil), StateDir: dir + "/db",
-		Factory: func(ctx context.Context) (*config.Config, error) { return config.Default("vtnet0", []string{"vtnet1"}), nil }})
+		Factory: func(ctx context.Context) (*config.Config, error) {
+			return config.Default("vtnet0", []string{"vtnet1"}), nil
+		}})
 	ts := httptest.NewServer(api.LocalSession(srv))
 	t.Cleanup(ts.Close)
 	out := &bytes.Buffer{}

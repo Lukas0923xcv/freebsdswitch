@@ -23,16 +23,16 @@ import (
 
 // Sim is a simulated kernel.
 type Sim struct {
-	mu       sync.Mutex
-	ifs      map[string]*state.Interface
-	order    []string
-	macs     map[string][]state.MACEntry // per bridge
-	sysctl   map[string]string
-	routes   backend.Routes
-	files    map[string][]byte
-	counters map[string]*backend.Counters
-	start    time.Time
-	hostname string
+	mu         sync.Mutex
+	ifs        map[string]*state.Interface
+	order      []string
+	macs       map[string][]state.MACEntry // per bridge
+	sysctl     map[string]string
+	routes     backend.Routes
+	files      map[string][]byte
+	counters   map[string]*backend.Counters
+	start      time.Time
+	hostname   string
 	laggMember map[string]string
 
 	// Log records every executed command.
@@ -56,13 +56,13 @@ type NIC struct {
 // New returns a simulator with the given NICs plus lo0.
 func New(nics ...NIC) *Sim {
 	s := &Sim{
-		ifs:      map[string]*state.Interface{},
-		macs:     map[string][]state.MACEntry{},
-		sysctl:   map[string]string{},
-		files:    map[string][]byte{},
-		counters: map[string]*backend.Counters{},
-		start:    time.Now(),
-		hostname: "bsdswitch",
+		ifs:        map[string]*state.Interface{},
+		macs:       map[string][]state.MACEntry{},
+		sysctl:     map[string]string{},
+		files:      map[string][]byte{},
+		counters:   map[string]*backend.Counters{},
+		start:      time.Now(),
+		hostname:   "bsdswitch",
 		laggMember: map[string]string{},
 	}
 	for _, k := range backend.SysctlsOfInterest {
@@ -79,13 +79,13 @@ func New(nics ...NIC) *Sim {
 		}
 		ifc := &state.Interface{
 			Name: n.Name, Driver: drv, DriverUnit: n.Name, MTU: 1500,
-			Flags:      []string{"BROADCAST", "SIMPLEX", "MULTICAST"},
-			MAC:        fmt.Sprintf("bc:24:11:aa:%02x:%02x", i/256, i%256),
-			IsEthernet: true,
-			Media:      "Ethernet autoselect",
+			Flags:          []string{"BROADCAST", "SIMPLEX", "MULTICAST"},
+			MAC:            fmt.Sprintf("bc:24:11:aa:%02x:%02x", i/256, i%256),
+			IsEthernet:     true,
+			Media:          "Ethernet autoselect",
 			SupportedMedia: []string{"media autoselect"},
-			Options:      []string{"RXCSUM", "TXCSUM", "VLAN_MTU", "VLAN_HWTAGGING", "VLAN_HWCSUM", "TSO4", "TSO6", "LRO", "LINKSTATE"},
-			Capabilities: []string{"RXCSUM", "TXCSUM", "VLAN_MTU", "VLAN_HWTAGGING", "JUMBO_MTU", "VLAN_HWCSUM", "TSO4", "TSO6", "LRO", "LINKSTATE"},
+			Options:        []string{"RXCSUM", "TXCSUM", "VLAN_MTU", "VLAN_HWTAGGING", "VLAN_HWCSUM", "TSO4", "TSO6", "LRO", "LINKSTATE"},
+			Capabilities:   []string{"RXCSUM", "TXCSUM", "VLAN_MTU", "VLAN_HWTAGGING", "JUMBO_MTU", "VLAN_HWCSUM", "TSO4", "TSO6", "LRO", "LINKSTATE"},
 		}
 		if drv != "vtnet" {
 			ifc.Options = append(ifc.Options, "VLAN_HWFILTER")

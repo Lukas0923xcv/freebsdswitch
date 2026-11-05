@@ -91,7 +91,9 @@ func (b *builder) bestEffort(argv ...string) {
 	b.op(backend.Op{Argv: argv, IgnoreError: true})
 }
 
-func (b *builder) warn(f string, a ...any) { b.plan.Warnings = append(b.plan.Warnings, fmt.Sprintf(f, a...)) }
+func (b *builder) warn(f string, a ...any) {
+	b.plan.Warnings = append(b.plan.Warnings, fmt.Sprintf(f, a...))
+}
 
 // Build computes the plan.
 func Build(in Input) *Plan {
@@ -139,9 +141,9 @@ func DesiredSysctls(c *config.Config) map[string]string {
 	}
 	return map[string]string{
 		// pf only sees bridged traffic when ACLs are configured
-		"net.link.bridge.pfil_member": pfil,
-		"net.link.bridge.pfil_bridge": "0",
-		"net.link.bridge.pfil_onlyip": "0",
+		"net.link.bridge.pfil_member":  pfil,
+		"net.link.bridge.pfil_bridge":  "0",
+		"net.link.bridge.pfil_onlyip":  "0",
 		"net.link.bridge.log_mac_flap": "1",
 		// a switch never routes between its management networks
 		"net.inet.ip.forwarding":   "0",

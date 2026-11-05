@@ -70,32 +70,32 @@ func ShellQuote(s string) string {
 
 // Counters are the per-interface statistics from if_data.
 type Counters struct {
-	RxPackets uint64 `json:"rx_packets"`
-	RxBytes   uint64 `json:"rx_bytes"`
-	RxErrors  uint64 `json:"rx_errors"`
-	RxDrops   uint64 `json:"rx_drops"`
-	TxPackets uint64 `json:"tx_packets"`
-	TxBytes   uint64 `json:"tx_bytes"`
-	TxErrors  uint64 `json:"tx_errors"`
-	TxDrops   uint64 `json:"tx_drops"`
-	RxMcast   uint64 `json:"rx_multicast"`
-	TxMcast   uint64 `json:"tx_multicast"`
+	RxPackets  uint64 `json:"rx_packets"`
+	RxBytes    uint64 `json:"rx_bytes"`
+	RxErrors   uint64 `json:"rx_errors"`
+	RxDrops    uint64 `json:"rx_drops"`
+	TxPackets  uint64 `json:"tx_packets"`
+	TxBytes    uint64 `json:"tx_bytes"`
+	TxErrors   uint64 `json:"tx_errors"`
+	TxDrops    uint64 `json:"tx_drops"`
+	RxMcast    uint64 `json:"rx_multicast"`
+	TxMcast    uint64 `json:"tx_multicast"`
 	Collisions uint64 `json:"collisions"`
-	LinkState int    `json:"link_state"` // 0 unknown, 1 down, 2 up
-	Baudrate  uint64 `json:"baudrate"`
+	LinkState  int    `json:"link_state"` // 0 unknown, 1 down, 2 up
+	Baudrate   uint64 `json:"baudrate"`
 }
 
 // SysInfo is general host information.
 type SysInfo struct {
-	Hostname   string  `json:"hostname"`
-	OSRelease  string  `json:"os_release"`  // e.g. 15.1-RELEASE-p6
-	Machine    string  `json:"machine"`     // amd64
-	UptimeSec  int64   `json:"uptime_sec"`
-	CPUModel   string  `json:"cpu_model"`
-	NCPU       int     `json:"ncpu"`
-	CPUPercent float64 `json:"cpu_percent"`
-	MemTotal   uint64  `json:"mem_total"`
-	MemUsed    uint64  `json:"mem_used"`
+	Hostname   string     `json:"hostname"`
+	OSRelease  string     `json:"os_release"` // e.g. 15.1-RELEASE-p6
+	Machine    string     `json:"machine"`    // amd64
+	UptimeSec  int64      `json:"uptime_sec"`
+	CPUModel   string     `json:"cpu_model"`
+	NCPU       int        `json:"ncpu"`
+	CPUPercent float64    `json:"cpu_percent"`
+	MemTotal   uint64     `json:"mem_total"`
+	MemUsed    uint64     `json:"mem_used"`
 	Load       [3]float64 `json:"load"`
 }
 

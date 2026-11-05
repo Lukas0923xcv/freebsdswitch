@@ -38,12 +38,12 @@ const (
 
 // Config is the complete desired state of the appliance.
 type Config struct {
-	Version    int        `yaml:"version" json:"version"`
-	System     System     `yaml:"system" json:"system"`
-	Management Management `yaml:"management" json:"management"`
-	Bridge     Bridge     `yaml:"bridge" json:"bridge"`
-	VLANs      []VLAN     `yaml:"vlans" json:"vlans"`
-	Ports      []Port     `yaml:"ports" json:"ports"`
+	Version    int         `yaml:"version" json:"version"`
+	System     System      `yaml:"system" json:"system"`
+	Management Management  `yaml:"management" json:"management"`
+	Bridge     Bridge      `yaml:"bridge" json:"bridge"`
+	VLANs      []VLAN      `yaml:"vlans" json:"vlans"`
+	Ports      []Port      `yaml:"ports" json:"ports"`
 	StaticMACs []StaticMAC `yaml:"static_macs,omitempty" json:"static_macs"`
 	// Unused lists detected interfaces the admin explicitly marked as
 	// unused (neither management nor switch port). Purely informational.
@@ -160,7 +160,7 @@ type StaticMAC struct {
 // ---- Phase 2 -----------------------------------------------------------
 
 type LAG struct {
-	Name     string   `yaml:"name" json:"name"` // lagg0
+	Name     string   `yaml:"name" json:"name"`         // lagg0
 	Protocol string   `yaml:"protocol" json:"protocol"` // lacp | failover | loadbalance | roundrobin
 	Members  []string `yaml:"members" json:"members"`
 	Hash     string   `yaml:"hash,omitempty" json:"hash"` // l2,l3,l4
@@ -172,12 +172,12 @@ type Mirror struct {
 }
 
 type ACLRule struct {
-	Action   string `yaml:"action" json:"action"` // pass | block
-	Proto    string `yaml:"proto,omitempty" json:"proto"`
-	Src      string `yaml:"src,omitempty" json:"src"`
-	Dst      string `yaml:"dst,omitempty" json:"dst"`
-	DstPort  string `yaml:"dst_port,omitempty" json:"dst_port"`
-	Comment  string `yaml:"comment,omitempty" json:"comment"`
+	Action  string `yaml:"action" json:"action"` // pass | block
+	Proto   string `yaml:"proto,omitempty" json:"proto"`
+	Src     string `yaml:"src,omitempty" json:"src"`
+	Dst     string `yaml:"dst,omitempty" json:"dst"`
+	DstPort string `yaml:"dst_port,omitempty" json:"dst_port"`
+	Comment string `yaml:"comment,omitempty" json:"comment"`
 }
 
 type ACL struct {

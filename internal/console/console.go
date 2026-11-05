@@ -39,7 +39,7 @@ type Console struct {
 	StateDir  string
 	Shell     string
 	// Exec runs a system command (service restart, reboot); replaceable in tests.
-	Exec func(name string, args ...string) error
+	Exec  func(name string, args ...string) error
 	Sleep func(time.Duration)
 }
 

@@ -31,9 +31,9 @@ const (
 )
 
 var (
-	ErrPending      = errors.New("a commit is waiting for confirmation; confirm or roll it back first")
-	ErrNoPending    = errors.New("no commit is waiting for confirmation")
-	ErrNoChanges    = errors.New("no changes to commit")
+	ErrPending       = errors.New("a commit is waiting for confirmation; confirm or roll it back first")
+	ErrNoPending     = errors.New("no commit is waiting for confirmation")
+	ErrNoChanges     = errors.New("no changes to commit")
 	ErrNoSuchVersion = errors.New("no such configuration version")
 )
 
@@ -329,12 +329,12 @@ func (i inventory) Lookup(n string) (bool, bool) {
 
 // Preview describes what a commit would do.
 type Preview struct {
-	Changed  bool           `json:"changed"`
-	Diff     string         `json:"diff"`
-	Plan     []plan.Section `json:"plan"`
-	Commands []string       `json:"commands"`
-	Warnings []string       `json:"warnings"`
-	MgmtImpact []string     `json:"mgmt_impact"`
+	Changed    bool           `json:"changed"`
+	Diff       string         `json:"diff"`
+	Plan       []plan.Section `json:"plan"`
+	Commands   []string       `json:"commands"`
+	Warnings   []string       `json:"warnings"`
+	MgmtImpact []string       `json:"mgmt_impact"`
 }
 
 // Preview computes the diff and plan for the candidate.
@@ -629,8 +629,12 @@ func (e *Engine) Save(ctx context.Context, user string) error {
 
 // ---- history ---------------------------------------------------------------------
 
-func (e *Engine) histFile(id int) string { return filepath.Join(e.paths.history(), fmt.Sprintf("%06d.yaml", id)) }
-func (e *Engine) histMeta(id int) string { return filepath.Join(e.paths.history(), fmt.Sprintf("%06d.json", id)) }
+func (e *Engine) histFile(id int) string {
+	return filepath.Join(e.paths.history(), fmt.Sprintf("%06d.yaml", id))
+}
+func (e *Engine) histMeta(id int) string {
+	return filepath.Join(e.paths.history(), fmt.Sprintf("%06d.json", id))
+}
 
 func (e *Engine) maxHistoryID() int {
 	ids := e.historyIDs()

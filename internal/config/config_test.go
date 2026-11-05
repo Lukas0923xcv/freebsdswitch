@@ -186,7 +186,9 @@ func TestValidationErrors(t *testing.T) {
 		}, "management.inband"},
 		{"half duplex gig", func(c *Config) { p := c.Port("vtnet1"); p.Speed = "1000"; p.Duplex = "half" }, "ports[vtnet1].duplex"},
 		{"duplex auto speed", func(c *Config) { c.Port("vtnet1").Duplex = "full" }, "ports[vtnet1].duplex"},
-		{"bad ifname", func(c *Config) { c.Ports = append(c.Ports, Port{Name: "eth0;ls", Mode: "access", PVID: 1, Speed: "auto", Duplex: "auto", STP: PortSTP{Priority: 128}, Offloads: "safe"}) }, "ports[eth0;ls]"},
+		{"bad ifname", func(c *Config) {
+			c.Ports = append(c.Ports, Port{Name: "eth0;ls", Mode: "access", PVID: 1, Speed: "auto", Duplex: "auto", STP: PortSTP{Priority: 128}, Offloads: "safe"})
+		}, "ports[eth0;ls]"},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

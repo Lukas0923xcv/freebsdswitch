@@ -340,9 +340,9 @@ func (t *ctl) show(w []string) error {
 		return nil
 	case match(w[0], "spanning-tree", 2):
 		var s struct {
-			Config config.STP        `json:"config"`
-			Bridge map[string]any    `json:"bridge"`
-			Ports  []map[string]any  `json:"ports"`
+			Config config.STP       `json:"config"`
+			Bridge map[string]any   `json:"bridge"`
+			Ports  []map[string]any `json:"ports"`
 		}
 		if err := t.c.Get("/api/v1/stp", &s); err != nil {
 			return err

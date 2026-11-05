@@ -46,16 +46,16 @@ var UI fs.FS
 
 // Options from the command line.
 type Options struct {
-	ConfigDir   string
-	StateDir    string
-	Sim         bool
-	Listen      string // dev: listen directly with TLS on this address
-	ListenHTTP  string // dev: plain HTTP (tests only, insecure cookies)
-	APISocket   string
-	UIDir       string
-	Boot        bool
-	NoFilter    bool
-	SimPorts    int
+	ConfigDir  string
+	StateDir   string
+	Sim        bool
+	Listen     string // dev: listen directly with TLS on this address
+	ListenHTTP string // dev: plain HTTP (tests only, insecure cookies)
+	APISocket  string
+	UIDir      string
+	Boot       bool
+	NoFilter   bool
+	SimPorts   int
 }
 
 func parseFlags(args []string) (*Options, error) {

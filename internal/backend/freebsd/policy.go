@@ -12,24 +12,24 @@ import (
 // Programs maps the command names used in plans to absolute paths.
 // Nothing else can be executed.
 var Programs = map[string]string{
-	"ifconfig":    "/sbin/ifconfig",
-	"sysctl":      "/sbin/sysctl",
-	"route":       "/sbin/route",
-	"hostname":    "/bin/hostname",
-	"sysrc":       "/usr/sbin/sysrc",
-	"service":     "/usr/sbin/service",
-	"dhclient":    "/sbin/dhclient",
-	"pkill":       "/bin/pkill",
-	"tzsetup":     "/usr/sbin/tzsetup",
-	"rtsol":       "/sbin/rtsol",
-	"pfctl":       "/sbin/pfctl",
-	"dnctl":       "/sbin/dnctl",
-	"kldload":     "/sbin/kldload",
-	"shutdown":    "/sbin/shutdown",
-	"pkg":         "/usr/sbin/pkg",
-	"bectl":       "/sbin/bectl",
-	"lldpcli":     "/usr/local/sbin/lldpcli",
-	"tcpdump":     "/usr/sbin/tcpdump",
+	"ifconfig": "/sbin/ifconfig",
+	"sysctl":   "/sbin/sysctl",
+	"route":    "/sbin/route",
+	"hostname": "/bin/hostname",
+	"sysrc":    "/usr/sbin/sysrc",
+	"service":  "/usr/sbin/service",
+	"dhclient": "/sbin/dhclient",
+	"pkill":    "/bin/pkill",
+	"tzsetup":  "/usr/sbin/tzsetup",
+	"rtsol":    "/sbin/rtsol",
+	"pfctl":    "/sbin/pfctl",
+	"dnctl":    "/sbin/dnctl",
+	"kldload":  "/sbin/kldload",
+	"shutdown": "/sbin/shutdown",
+	"pkg":      "/usr/sbin/pkg",
+	"bectl":    "/sbin/bectl",
+	"lldpcli":  "/usr/local/sbin/lldpcli",
+	"tcpdump":  "/usr/sbin/tcpdump",
 }
 
 var (
@@ -44,15 +44,15 @@ var (
 
 // AllowedFiles may be written through WriteFile.
 var AllowedFiles = map[string]bool{
-	"/etc/resolv.conf":                      true,
-	"/etc/ntp.conf":                         true,
-	"/etc/snmpd.config":                     true,
-	"/usr/local/etc/lldpd.conf":             true,
+	"/etc/resolv.conf":                       true,
+	"/etc/ntp.conf":                          true,
+	"/etc/snmpd.config":                      true,
+	"/usr/local/etc/lldpd.conf":              true,
 	"/usr/local/etc/syslog.d/bsdswitch.conf": true,
-	"/usr/local/etc/bsdswitch/pf.conf":      true,
-	"/usr/local/etc/bsdswitch/tls/cert.pem": true,
-	"/usr/local/etc/bsdswitch/tls/key.pem":  true,
-	"/etc/motd.template":                    true,
+	"/usr/local/etc/bsdswitch/pf.conf":       true,
+	"/usr/local/etc/bsdswitch/tls/cert.pem":  true,
+	"/usr/local/etc/bsdswitch/tls/key.pem":   true,
+	"/etc/motd.template":                     true,
 }
 
 // CheckOp validates an operation against the privilege policy. It is
