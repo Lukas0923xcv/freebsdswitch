@@ -65,6 +65,11 @@ type System struct {
 	Timezone string   `yaml:"timezone,omitempty" json:"timezone"`
 	DNS      []string `yaml:"dns,omitempty" json:"dns"`
 	NTP      []string `yaml:"ntp,omitempty" json:"ntp"`
+	// ManageHost (default true) lets bsdswitch own the host settings:
+	// hostname, time zone, DNS, NTP, SSH and the default routes. Set to
+	// false when bsdswitch runs on a machine that is managed otherwise
+	// (e.g. the integration test lab on a development VM).
+	ManageHost *bool `yaml:"manage_host,omitempty" json:"manage_host"`
 }
 
 type IPConfig struct {

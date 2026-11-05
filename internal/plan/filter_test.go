@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Lukas0923xcv/freebsdswitch/internal/config"
+	"github.com/Lukas0923xcv/freebsdswitch/internal/state"
 )
 
 func TestPFConfAndFilterPlan(t *testing.T) {
@@ -93,5 +94,30 @@ func TestLAGAndMirror(t *testing.T) {
 	apply(t, sim, plan(t, sim, c, n))
 	if p3 := plan(t, sim, c, c); !p3.Empty() {
 		t.Fatalf("revert not converged:\n%s", p3.Script())
+	}
+}
+
+func TestFixedMediaAndUnmanagedHost(t *testing.T) {
+	fixed := state.Interface{Name: "epair1a", Driver: "epair", SupportedMedia: []string{"media 10Gbase-T mediaopt full-duplex"}}
+	if fixed.SpeedSettable() {
+		t.Fatal("fixed media must not be settable")
+	}
+	intel := state.Interface{Name: "em0", Driver: "em", SupportedMedia: []string{"media autoselect", "media 100baseTX mediaopt full-duplex"}}
+	if !intel.SpeedSettable() {
+		t.Fatal("em0 should be settable")
+	}
+	sim := vmSim()
+	c := parse(t, example)
+	f := false
+	c.System.ManageHost = &f
+	p := plan(t, sim, c, nil)
+	s := p.Script()
+	for _, bad := range []string{"route ", "hostname", "tzsetup", "sshd", "resolv.conf"} {
+		if strings.Contains(s, bad) {
+			t.Errorf("unmanaged host: unexpected %q in\n%s", bad, s)
+		}
+	}
+	if !strings.Contains(s, "ifconfig bridge0 addm vtnet1") {
+		t.Fatal("switch config must still be applied")
 	}
 }

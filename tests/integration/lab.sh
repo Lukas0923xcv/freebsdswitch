@@ -82,7 +82,7 @@ up() {
 
 	cat > $LAB/etc/config.yaml <<EOF
 version: 1
-system: { hostname: bswlab, timezone: UTC }
+system: { hostname: bswlab, timezone: UTC, manage_host: false }
 management:
   interface: $(ifa mgmt)
   ipv4: { mode: static, address: 192.0.2.1/24 }

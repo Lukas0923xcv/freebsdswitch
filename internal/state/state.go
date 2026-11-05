@@ -88,12 +88,18 @@ func (i *Interface) SpeedSettable() bool {
 	if i.IsVirtio() {
 		return false
 	}
+	// Only NICs that offer autoselect plus at least one fixed speed can
+	// be configured; fixed-media interfaces (epair, some 10G optics)
+	// reject any media change.
+	auto, fixed := false, false
 	for _, m := range i.SupportedMedia {
-		if MediaSpeed(m) > 0 {
-			return true
+		if strings.Contains(m, "autoselect") {
+			auto = true
+		} else if MediaSpeed(m) > 0 {
+			fixed = true
 		}
 	}
-	return false
+	return auto && fixed
 }
 
 var mediaSpeedRe = regexp.MustCompile(`(?i)\b([0-9]+(?:\.[0-9]+)?)(G|M)?base`)

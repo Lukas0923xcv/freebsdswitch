@@ -816,6 +816,8 @@ func SafeConfig(st *config.Config, fallbackMgmt string) *config.Config {
 		m.InBand = config.InBand{}
 		c.Management = m
 		c.System = st.System
+		// keep bridge-level settings (name, MTU, STP) but no ports
+		c.Bridge = st.Bridge
 		c.ApplyDefaults()
 		if config.Validate(c, nil) != nil {
 			c = config.Default(mgmt, nil)

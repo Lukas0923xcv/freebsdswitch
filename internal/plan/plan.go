@@ -111,8 +111,12 @@ func Build(in Input) *Plan {
 	b.bridge()
 	b.staticMACs()
 	b.inband()
-	b.routes()
-	b.services()
+	if config.Bool(in.Desired.System.ManageHost, true) {
+		b.routes()
+		b.services()
+	} else {
+		b.filters()
+	}
 	// drop empty sections
 	var secs []Section
 	for _, s := range b.plan.Sections {
