@@ -223,6 +223,8 @@ type portPatch struct {
 	Tagged      *config.VIDSet `json:"tagged"`
 	MaxAddr     *int           `json:"max_addresses"`
 	Isolated    *bool          `json:"isolated"`
+	QinQ        *bool          `json:"qinq"`
+	VLANProto   *string        `json:"vlan_proto"`
 	STP         *struct {
 		Enabled  *bool `json:"enabled"`
 		Edge     *bool `json:"edge"`
@@ -274,6 +276,12 @@ func (pp *portPatch) apply(p *config.Port) {
 	}
 	if pp.Isolated != nil {
 		p.Private = *pp.Isolated
+	}
+	if pp.QinQ != nil {
+		p.QinQ = *pp.QinQ
+	}
+	if pp.VLANProto != nil {
+		p.VLANProto = *pp.VLANProto
 	}
 	if st := pp.STP; st != nil {
 		if st.Enabled != nil {

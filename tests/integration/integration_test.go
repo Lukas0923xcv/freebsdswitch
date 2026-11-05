@@ -255,3 +255,55 @@ func TestTrunkRemoveTaggedVLAN(t *testing.T) {
 	c.Post("/api/v1/commit/cancel", nil, nil)
 	eventually(t, "trunk restored", "h4", "10.20.0.3", true, 20*time.Second)
 }
+
+func TestLACP(t *testing.T) {
+	m1, m2 := eps["lag1"][0], eps["lag2"][0]
+	if err := c.Post("/api/v1/lags", map[string]any{"name": "lagg7", "protocol": "lacp", "members": []string{m1, m2}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	commit(t, 120)
+	defer c.Post("/api/v1/commit/cancel", nil, nil)
+	// h6 (LACP bundle in a jail) is in VLAN 1 like h5
+	eventually(t, "over the LACP bundle", "h5", "10.1.0.6", true, 60*time.Second)
+	var lags []api.LAGView
+	if err := c.Get("/api/v1/lags", &lags); err != nil {
+		t.Fatal(err)
+	}
+	active := 0
+	for _, l := range lags {
+		for _, p := range l.Ports {
+			if p.Active {
+				active++
+			}
+		}
+	}
+	if active != 2 {
+		t.Fatalf("expected 2 distributing LACP members: %+v", lags)
+	}
+	// one member down: traffic continues on the other
+	sh(t, "ifconfig "+m1+" down")
+	defer exec.Command("ifconfig", m1, "up").Run()
+	eventually(t, "LACP with one member down", "h5", "10.1.0.6", true, 30*time.Second)
+}
+
+func TestACLBlocksICMP(t *testing.T) {
+	eventually(t, "baseline", "h1", "10.10.0.2", true, 40*time.Second)
+	acl := []map[string]any{{"name": "noping", "port": eps["h1"][0], "direction": "in", "default": "pass",
+		"rules": []map[string]any{{"action": "block", "proto": "icmp", "dst": "10.10.0.2"}}}}
+	if err := c.Do("PUT", "/api/v1/acls", acl, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Do("PUT", "/api/v1/rate-limits", []map[string]any{{"port": eps["h5"][0], "ingress_kbps": 5000}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	commit(t, 120)
+	defer func() {
+		c.Post("/api/v1/commit/cancel", nil, nil)
+		eventually(t, "ACL removed", "h1", "10.10.0.2", true, 20*time.Second)
+	}()
+	never(t, "ICMP blocked by ACL", "h1", "10.10.0.2", 5*time.Second)
+	eventually(t, "other hosts unaffected", "h4", "10.10.0.2", true, 20*time.Second)
+	if out := sh(t, "dnctl pipe show"); !strings.Contains(out, "5.000 Mbit/s") && !strings.Contains(out, "5000") {
+		t.Fatalf("dummynet pipe missing:\n%s", out)
+	}
+}

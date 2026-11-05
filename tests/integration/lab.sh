@@ -33,6 +33,7 @@ BIN=${BSDSWITCH_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/build/bsdswitch}
 BRIDGE=${LAB_BRIDGE:-bridge77}
 WEB=${LAB_WEB:-0.0.0.0:8443}
 JAILS="mgmt h1 h2 h3 h4 h5"
+ALLJAILS="$JAILS h6"
 
 j() { jexec "$1" sh -c "$2"; }
 
@@ -53,6 +54,14 @@ up() {
 	done
 	loop=$(ifconfig epair create)
 	echo "loop ${loop%a}a ${loop%a}b" >> $LAB/epairs
+	# LACP partner: jail h6 bundles two epairs into lagg0
+	l1=$(ifconfig epair create); l2=$(ifconfig epair create)
+	echo "lag1 ${l1%a}a ${l1%a}b" >> $LAB/epairs
+	echo "lag2 ${l2%a}a ${l2%a}b" >> $LAB/epairs
+	ifconfig ${l1%a}a up; ifconfig ${l2%a}a up
+	jail -c name=bswlab_h6 vnet persist host.hostname=h6 vnet.interface=${l1%a}b vnet.interface=${l2%a}b
+	j bswlab_h6 "kldload -n if_lagg 2>/dev/null; ifconfig ${l1%a}b up; ifconfig ${l2%a}b up; \
+		ifconfig lagg0 create laggproto lacp laggport ${l1%a}b laggport ${l2%a}b; ifconfig lagg0 inet 10.1.0.6/24 up"
 	ifconfig ${loop%a}a up
 	ifconfig ${loop%a}b up
 
@@ -107,7 +116,7 @@ run() {
 
 down() {
 	[ -f $LAB/pid ] && kill "$(cat $LAB/pid)" 2>/dev/null || true
-	for jn in $JAILS; do jail -r bswlab_$jn 2>/dev/null || true; done
+	for jn in $ALLJAILS; do jail -r bswlab_$jn 2>/dev/null || true; done
 	if [ -f $LAB/epairs ]; then
 		while read -r name a b; do ifconfig "$a" destroy 2>/dev/null || true; done < $LAB/epairs
 	fi

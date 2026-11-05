@@ -68,7 +68,7 @@ shows under **System › About**.
 | Protected / isolated ports | ✅ | `private` flag |
 | Link aggregation (LACP) | ✅ | `lagg(4)` as a bridge member |
 | Port mirroring (SPAN) | ⚠️ | A span port receives **all** bridged traffic. No per-port, per-direction or per-VLAN selection, and no RSPAN |
-| ACLs (IP/TCP/UDP/ICMP) | ⚠️ | Uses `pf` on bridge members; costs CPU |
+| ACLs (IP/TCP/UDP/ICMP) | ⚠️ | Uses `pf` on bridge member ports. Only untagged traffic is filtered (802.1Q-tagged frames on trunks pass); costs CPU. The UI shows the generated `pf.conf` |
 | MAC ACLs | ❌ | `pf` cannot match MAC addresses |
 | Rate limiting | ⚠️ | `dummynet` pipes per port; software shaping that adds latency |
 | QoS / 802.1p priority queues | ❌ | No hardware queues; the PCP bits are passed through |

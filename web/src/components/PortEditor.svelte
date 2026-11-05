@@ -24,6 +24,8 @@
     cost: config0.stp?.path_cost || 0,
     maxAddr: config0.max_addresses || 0,
     isolated: !!config0.isolated,
+    qinq: !!config0.qinq,
+    vlanProto: config0.vlan_proto || '802.1q',
   })
   let errors = $state({})
   let busy = $state(false)
@@ -59,6 +61,7 @@
       description: f.description, shutdown: f.shutdown, mode: f.mode,
       stp: { enabled: f.stpEnabled, edge: f.edge, auto_edge: f.autoEdge, priority: Number(f.priority), path_cost: Number(f.cost) },
       max_addresses: Number(f.maxAddr), isolated: f.isolated,
+      qinq: f.qinq, vlan_proto: f.vlanProto === '802.1q' ? '' : f.vlanProto,
     }
     if (port.speed_settable) { body.speed = f.speed; body.duplex = f.speed === 'auto' ? 'auto' : f.duplex }
     if (f.mode === 'access') body.pvid = Number(f.pvid)
@@ -109,6 +112,13 @@
     <div class="field"><label class="check"><input type="checkbox" bind:checked={f.edge} /> Edge port (PortFast)</label><label class="check" style="margin-top:6px"><input type="checkbox" bind:checked={f.autoEdge} /> Auto-detect edge</label></div>
     <div class="field"><label for="pp">Port priority</label><input id="pp" type="number" min="0" max="240" step="16" bind:value={f.priority} class:invalid={errors.priority} />{#if errors.priority}<div class="err">{errors.priority}</div>{/if}</div>
     <div class="field"><label for="pc">Path cost</label><input id="pc" type="number" min="0" bind:value={f.cost} class:invalid={errors.cost} /><div class="hint">0 = automatic (from link speed)</div></div>
+    <div class="field full"><details><summary class="small">Advanced: Q-in-Q (802.1ad)</summary>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="field"><label for="vp">Tag protocol (TPID)</label><select id="vp" bind:value={f.vlanProto}><option value="802.1q">802.1Q (0x8100)</option><option value="802.1ad">802.1ad (0x88a8, S-tag)</option></select>
+          <div class="hint">802.1ad on provider/uplink ports carrying S-tags.</div></div>
+        <div class="field"><label class="check"><input type="checkbox" bind:checked={f.qinq} /> Allow Q-in-Q frames on this port</label>
+          <div class="hint">Customer port that may send already-tagged frames into an S-VLAN. No selective QinQ.</div></div>
+      </div></details></div>
     <div class="field"><label for="pa">Max MAC addresses (port security)</label><input id="pa" type="number" min="0" bind:value={f.maxAddr} class:invalid={errors.maxAddr} /><div class="hint">0 = unlimited</div></div>
   </form>
   {#snippet footer()}

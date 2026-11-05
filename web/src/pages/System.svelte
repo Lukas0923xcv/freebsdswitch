@@ -11,17 +11,21 @@
   import Power from './system/Power.svelte'
   import About from './system/About.svelte'
   import Audit from './system/Audit.svelte'
+  import Services from './system/Services.svelte'
+  import Update from './system/Update.svelte'
 
   const tabs = [
     ['general', 'General', General],
     ['management', 'Management access', Management],
     ['users', 'Users', Users],
     ['tokens', 'API tokens', Tokens],
+    ['services', 'Services', Services],
     ['certificate', 'Certificate', Certificate],
     ['config', 'Configuration', Config],
     ['logs', 'Logs', Logs],
     ['audit', 'Audit log', Audit],
     ['diagnostics', 'Diagnostics', Diagnostics],
+    ['update', 'Update', Update],
     ['power', 'Power', Power],
     ['about', 'About', About],
   ]

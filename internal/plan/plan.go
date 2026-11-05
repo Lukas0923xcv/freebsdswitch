@@ -134,7 +134,7 @@ func (b *builder) prevChanged(f func(c *config.Config) any) bool {
 // DesiredSysctls returns the sysctl values bsdswitch enforces.
 func DesiredSysctls(c *config.Config) map[string]string {
 	pfil := "0"
-	if len(c.ACLs) > 0 {
+	if FilteringEnabled(c) {
 		pfil = "1"
 	}
 	return map[string]string{
@@ -338,6 +338,7 @@ func (b *builder) lags() {
 			if !curPorts[mem] {
 				if br := b.bridgeState(); br != nil && br.Member(mem) != nil {
 					b.exec("ifconfig", c.Bridge.Name, "deletem", mem)
+					b.removed[mem] = true
 				}
 				if mi.MTU != c.Bridge.MTU {
 					b.exec("ifconfig", mem, "mtu", strconv.Itoa(c.Bridge.MTU))
@@ -349,12 +350,16 @@ func (b *builder) lags() {
 				b.exec("ifconfig", l.Name, "laggport", mem)
 			}
 		}
+		if ifc == nil || !ifc.AdminUp() {
+			b.exec("ifconfig", l.Name, "up")
+		}
 	}
 	// destroy LAGs that are no longer configured
 	for _, i := range b.in.Snap.Interfaces {
 		if i.Lagg != nil && !desired[i.Name] && b.wasManagedLAG(i.Name) {
 			if br := b.bridgeState(); br != nil && br.Member(i.Name) != nil {
 				b.exec("ifconfig", c.Bridge.Name, "deletem", i.Name)
+				b.removed[i.Name] = true
 			}
 			b.exec("ifconfig", i.Name, "destroy")
 		}
@@ -540,7 +545,7 @@ func (b *builder) bridge() {
 	// Remove members that are no longer switch ports.
 	for _, m := range br.Members {
 		if desired[m.Name] == nil {
-			if m.Name != c.Management.Interface && !b.isLAGMember(m.Name) {
+			if m.Name != c.Management.Interface && !b.isLAGMember(m.Name) && !b.removed[m.Name] {
 				b.exec("ifconfig", bn, "deletem", m.Name)
 			}
 			b.removed[m.Name] = true

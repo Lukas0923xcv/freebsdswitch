@@ -74,6 +74,10 @@ func TestPlannerOutputPassesPolicy(t *testing.T) {
 	c.SNMP = config.SNMP{Enabled: true, Community: "public"}
 	c.LLDP.Enabled = true
 	c.Syslog.Servers = []string{"192.168.1.5"}
+	c.LAGs = []config.LAG{{Name: "lagg0", Protocol: "lacp", Members: []string{"vtnet4", "igb0"}, Hash: "l2,l3", LACPFast: true}}
+	c.Ports = append(c.Ports, config.Port{Name: "lagg0", Mode: "trunk", Native: 1, Tagged: config.VIDSet{10}})
+	c.ACLs = []config.ACL{{Name: "a1", Port: "vtnet1", Direction: "in", Default: "block", Rules: []config.ACLRule{{Action: "pass", Proto: "tcp", Dst: "10.0.0.0/8", DstPort: "443"}}}}
+	c.RateLimits = []config.RateLimit{{Port: "vtnet2", Ingress: 1000}}
 	c.ApplyDefaults()
 	if err := config.Validate(c, nil); err != nil {
 		t.Fatal(err)

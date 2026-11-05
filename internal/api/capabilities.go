@@ -19,7 +19,7 @@ var Capabilities = []Capability{
 	{"Protected ports (port isolation)", "supported", "if_bridge private flag"},
 	{"Link aggregation (LACP 802.3ad)", "supported", "lagg(4) as bridge member"},
 	{"Port mirroring (SPAN)", "partial", "bridge span ports copy ALL bridged traffic, not per source port/VLAN; no RSPAN"},
-	{"ACLs (L3/L4)", "partial", "pf with bridge filtering; IP/TCP/UDP/ICMP only, costs CPU"},
+	{"ACLs (L3/L4)", "partial", "pf on bridge member ports; IP/TCP/UDP/ICMP of untagged traffic only (tagged frames on trunks pass), costs CPU"},
 	{"MAC ACLs", "unsupported", "pf does not filter on MAC addresses"},
 	{"Rate limiting / policing", "partial", "dummynet pipes per port; software shaping, adds latency"},
 	{"QoS / 802.1p priority queues", "unsupported", "no hardware queues; PCP is passed through unchanged"},
