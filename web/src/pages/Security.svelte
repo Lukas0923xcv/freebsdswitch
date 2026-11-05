@@ -72,8 +72,8 @@
               {#each a.rules as r, i}
                 <tr>
                   <td>{i + 1}</td>
-                  <td><select bind:value={r.action} onchange={() => (dirty = true)} disabled={!isAdmin()}><option value="pass">pass</option><option value="block">block</option></select></td>
-                  <td><select bind:value={r.proto} onchange={() => (dirty = true)} disabled={!isAdmin()}><option value="any">any</option><option value="tcp">tcp</option><option value="udp">udp</option><option value="icmp">icmp</option><option value="icmp6">icmp6</option></select></td>
+                  <td><select bind:value={r.action} onchange={() => (dirty = true)} disabled={!isAdmin()} style="min-width:92px"><option value="pass">pass</option><option value="block">block</option></select></td>
+                  <td><select bind:value={r.proto} onchange={() => (dirty = true)} disabled={!isAdmin()} style="min-width:92px"><option value="any">any</option><option value="tcp">tcp</option><option value="udp">udp</option><option value="icmp">icmp</option><option value="icmp6">icmp6</option></select></td>
                   <td><input bind:value={r.src} placeholder="any" oninput={() => (dirty = true)} disabled={!isAdmin()} /></td>
                   <td><input bind:value={r.dst} placeholder="any" oninput={() => (dirty = true)} disabled={!isAdmin()} /></td>
                   <td><input bind:value={r.dst_port} placeholder={r.proto === 'tcp' || r.proto === 'udp' ? '443 or 1000:2000' : '—'} disabled={!isAdmin() || !(r.proto === 'tcp' || r.proto === 'udp')} oninput={() => (dirty = true)} style="width:110px" /></td>

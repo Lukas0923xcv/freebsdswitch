@@ -328,7 +328,10 @@ bsdswitch 0.1.0 - sw01
 | **VLANs** | VLAN list, **membership matrix** (click a cell: not a member → untagged → tagged) and in-band management VLAN. |
 | **MAC table** | Search and filter, static entries, aging time, flush. |
 | **Spanning tree** | Mode, priority and timers, root bridge information, and per-port role, state, cost and edge. |
-| **System** | General settings, management access (interface, IP, SSH, allowed subnets), users and roles, API tokens, TLS certificate, configuration (running YAML, diff to startup, save, backup/restore, YAML editor, the last 10 versions with rollback), logs (live), audit log, diagnostics (ping, traceroute, packet capture as pcap download), power and an About page with the feature table. |
+| **Link aggregation** | Create LACP, failover or load-balance LAGs; per-member LACP state (active or standby). The LAG then appears as a port. |
+| **ACL / QoS / Mirror** | Per-port ACLs (rule editor) compiled to `pf`; ingress and egress rate limits as `dummynet` pipes; span-port mirroring; a **preview of the generated `pf.conf` and `dnctl` commands**. |
+| **LLDP neighbors** | Which device is on which port (lldpd). |
+| **System** | General settings, management access (interface, IP, SSH, allowed subnets), users and roles, API tokens, TLS certificate, configuration (running YAML, diff to startup, save, backup/restore, YAML editor, the last 10 versions with rollback), logs (live), audit log, diagnostics (ping, traceroute, packet capture as pcap download), **services** (SNMP, LLDP, remote syslog), **update** (upload a `.pkg` or upgrade from the pkg repository; on ZFS a boot environment is created first and "Revert" reboots into it), power and an About page with the feature table. |
 
 **The change workflow.** Every edit is *staged*. A blue bar shows how many
 changes are pending. *Review* shows the YAML diff and the **exact

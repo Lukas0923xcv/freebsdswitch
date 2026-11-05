@@ -67,6 +67,14 @@ configuration.** Nothing changes on the switch until `POST /commit`.
 | `POST /diag/ping`, `POST /diag/traceroute` | admin | `{host,count,family}` |
 | `POST /diag/capture`, `GET /diag/capture/{id}[.pcap]` | admin | `{port,count,seconds,filter}` → pcap |
 | `POST /system/restart`, `/system/reboot`, `/system/shutdown` | admin | reboot/shutdown need `{confirm:true}` |
+| `GET /lags`, `POST /lags`, `PUT/DELETE /lags/{name}` | ro/admin | `{name?, protocol: lacp\|failover\|loadbalance\|roundrobin, members[], hash, lacp_fast}`; status includes per-member LACP flags |
+| `GET/PUT /mirrors` | ro/admin | `[{destination}]` span ports |
+| `GET/PUT /acls` | ro/admin | `[{name, port, direction: in\|out, default: pass\|block, rules:[{action, proto, src, dst, dst_port, comment}]}]` |
+| `GET/PUT /rate-limits` | ro/admin | `[{port, ingress_kbps, egress_kbps}]` |
+| `GET /filters/preview` | ro | generated `pf.conf` and `dnctl` commands for the candidate |
+| `GET/PATCH /services` | ro/admin | `{snmp:{enabled,community,location,contact}, lldp:{enabled}, syslog:{servers[]}}` |
+| `GET /lldp/neighbors` | ro | LLDP neighbors (lldpcli) |
+| `GET /system/update`, `POST /system/update/upload?name=bsdswitch-X.pkg` (raw body), `POST /system/update/check`, `POST /system/update/apply {source: upload\|repo}`, `POST /system/update/revert {confirm}` | admin | in-place update with a boot environment as fallback |
 | `GET /capabilities` | ro | feature/limitation matrix |
 | `GET /version` | – | version |
 
