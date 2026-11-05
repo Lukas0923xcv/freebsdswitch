@@ -61,7 +61,7 @@ up() {
 	ifconfig ${l1%a}a up; ifconfig ${l2%a}a up
 	jail -c name=bswlab_h6 vnet persist host.hostname=h6 vnet.interface=${l1%a}b vnet.interface=${l2%a}b
 	j bswlab_h6 "kldload -n if_lagg 2>/dev/null; ifconfig ${l1%a}b up; ifconfig ${l2%a}b up; \
-		ifconfig lagg0 create laggproto lacp laggport ${l1%a}b laggport ${l2%a}b; ifconfig lagg0 inet 10.1.0.6/24 up"
+		ifconfig lagg0 create laggproto lacp lacp_fast_timeout laggport ${l1%a}b laggport ${l2%a}b; ifconfig lagg0 inet 10.1.0.6/24 up"
 	ifconfig ${loop%a}a up
 	ifconfig ${loop%a}b up
 

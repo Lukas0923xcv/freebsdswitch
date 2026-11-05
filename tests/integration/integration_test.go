@@ -258,7 +258,7 @@ func TestTrunkRemoveTaggedVLAN(t *testing.T) {
 
 func TestLACP(t *testing.T) {
 	m1, m2 := eps["lag1"][0], eps["lag2"][0]
-	if err := c.Post("/api/v1/lags", map[string]any{"name": "lagg7", "protocol": "lacp", "members": []string{m1, m2}}, nil); err != nil {
+	if err := c.Post("/api/v1/lags", map[string]any{"name": "lagg7", "protocol": "lacp", "members": []string{m1, m2}, "lacp_fast": true}, nil); err != nil {
 		t.Fatal(err)
 	}
 	commit(t, 120)
@@ -283,7 +283,8 @@ func TestLACP(t *testing.T) {
 	// one member down: traffic continues on the other
 	sh(t, "ifconfig "+m1+" down")
 	defer exec.Command("ifconfig", m1, "up").Run()
-	eventually(t, "LACP with one member down", "h5", "10.1.0.6", true, 30*time.Second)
+	// both ends use LACP fast timeout (1 s PDUs, 3 s expiry)
+	eventually(t, "LACP with one member down", "h5", "10.1.0.6", true, 45*time.Second)
 }
 
 func TestACLBlocksICMP(t *testing.T) {
