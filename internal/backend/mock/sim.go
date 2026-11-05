@@ -361,8 +361,23 @@ func (s *Sim) Run(ctx context.Context, op backend.Op) (string, error) {
 			s.hostname = args[0]
 		}
 		return "", nil
+	case "dhclient":
+		// simulate a DHCP lease
+		name := args[len(args)-1]
+		if i := s.ifs[name]; i != nil && len(i.IPv4) == 0 {
+			n := 100 + len(s.order)
+			if strings.Contains(name, ".") {
+				i.IPv4 = append(i.IPv4, fmt.Sprintf("10.99.0.%d/24", n))
+			} else {
+				i.IPv4 = append(i.IPv4, fmt.Sprintf("192.168.1.%d/24", n))
+				if s.routes.Default4 == "" {
+					s.routes.Default4 = "192.168.1.1"
+				}
+			}
+		}
+		return "", nil
 	default:
-		// sysrc, service, dhclient, pkill, tzsetup, ... are recorded only.
+		// sysrc, service, pkill, tzsetup, ... are recorded only.
 		return "", nil
 	}
 }

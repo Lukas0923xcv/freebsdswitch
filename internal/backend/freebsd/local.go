@@ -28,8 +28,11 @@ func run(ctx context.Context, prog string, args ...string) (string, error) {
 	if !ok {
 		path = prog
 	}
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+		defer cancel()
+	}
 	cmd := exec.CommandContext(ctx, path, args...)
 	cmd.Env = []string{"PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin", "LANG=C"}
 	var out, errb bytes.Buffer
