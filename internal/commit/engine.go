@@ -352,7 +352,9 @@ func (e *Engine) Preview(ctx context.Context) (*Preview, error) {
 	if pv.Plan == nil {
 		pv.Plan = []plan.Section{}
 	}
-	pv.Commands = p.Commands()
+	if cmds := p.Commands(); cmds != nil {
+		pv.Commands = cmds
+	}
 	if p.Warnings != nil {
 		pv.Warnings = p.Warnings
 	}
@@ -362,7 +364,7 @@ func (e *Engine) Preview(ctx context.Context) (*Preview, error) {
 
 // MgmtImpact lists changes that may cut off management access.
 func MgmtImpact(old, new *config.Config) []string {
-	var out []string
+	out := []string{}
 	om, nm := old.Management, new.Management
 	if om.Interface != nm.Interface {
 		out = append(out, fmt.Sprintf("management interface changes from %s to %s", om.Interface, nm.Interface))

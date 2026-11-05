@@ -26,7 +26,8 @@ func main() {
 	daemon.UI = webui.FS()
 	name := filepath.Base(os.Args[0])
 	args := os.Args[1:]
-	if name == "bsdswitch" && len(args) > 0 {
+	known := map[string]bool{"bsdswitchd": true, "bsdswitch-privd": true, "bsdswitchctl": true, "bsdswitch-console": true}
+	if !known[name] && len(args) > 0 {
 		switch args[0] {
 		case "daemon":
 			name = "bsdswitchd"

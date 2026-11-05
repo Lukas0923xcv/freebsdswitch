@@ -8,3 +8,5 @@
 /iso/work/
 *.iso
 *.img
+/tests/e2e/.state/
+/web/.vite/

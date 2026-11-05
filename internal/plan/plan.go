@@ -56,7 +56,7 @@ func (p *Plan) Empty() bool { return len(p.Ops()) == 0 }
 
 // Commands renders the plan as shell commands with section comments.
 func (p *Plan) Commands() []string {
-	var out []string
+	out := []string{}
 	for _, s := range p.Sections {
 		out = append(out, "# "+s.Title)
 		for _, o := range s.Ops {
