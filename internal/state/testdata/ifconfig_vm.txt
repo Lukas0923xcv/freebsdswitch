@@ -1,0 +1,83 @@
+vtnet0: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	options=4c079b<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWTSO,LINKSTATE,TXCSUM_IPV6>
+	capabilities=4c07bb<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,JUMBO_MTU,VLAN_HWCSUM,TSO4,TSO6,LRO,VLAN_HWTSO,LINKSTATE,TXCSUM_IPV6>
+	ether bc:24:11:aa:00:00
+	inet 192.168.1.10 netmask 0xffffff00 broadcast 192.168.1.255
+	inet6 fe80::be24:11ff:feaa:0%vtnet0 prefixlen 64 scopeid 0x1
+	media: Ethernet autoselect (10Gbase-T <full-duplex>)
+	status: active
+	supported media:
+		media autoselect
+		media 10Gbase-T mediaopt full-duplex
+	nd6 options=23<PERFORMNUD,ACCEPT_RTADV,AUTO_LINKLOCAL>
+	drivername: vtnet0
+vtnet1: flags=1008943<UP,BROADCAST,RUNNING,PROMISC,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	description: PC-1
+	options=4c0098<VLAN_MTU,VLAN_HWTAGGING,VLAN_HWCSUM,LINKSTATE,TXCSUM_IPV6>
+	ether bc:24:11:aa:00:01
+	media: Ethernet autoselect (10Gbase-T <full-duplex>)
+	status: active
+	supported media:
+		media autoselect
+		media 10Gbase-T mediaopt full-duplex
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	drivername: vtnet1
+em0: flags=1008802<BROADCAST,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	options=481249b<RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,VLAN_HWFILTER,LRO,WOL_MAGIC,VLAN_HWFILTER,NOMAP>
+	ether 00:1b:21:00:00:02
+	media: Ethernet 1000baseT <full-duplex>
+	status: no carrier
+	supported media:
+		media autoselect
+		media 1000baseT
+		media 1000baseT mediaopt full-duplex
+		media 100baseTX mediaopt full-duplex
+		media 100baseTX
+		media 10baseT/UTP mediaopt full-duplex
+		media 10baseT/UTP
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	drivername: em0
+lo0: flags=1008049<UP,LOOPBACK,RUNNING,MULTICAST,LOWER_UP> metric 0 mtu 16384
+	options=680003<RXCSUM,TXCSUM,LINKSTATE,RXCSUM_IPV6,TXCSUM_IPV6>
+	inet 127.0.0.1 netmask 0xff000000
+	inet6 ::1 prefixlen 128
+	groups: lo
+	nd6 options=21<PERFORMNUD,AUTO_LINKLOCAL>
+	drivername: lo0
+bridge0: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	options=0
+	ether 58:9c:fc:10:ff:b6
+	id 58:9c:fc:10:ff:b6 priority 32768 hellotime 2 fwddelay 15
+	maxage 20 holdcnt 6 proto rstp maxaddr 2000 timeout 300
+	root id 58:9c:fc:10:ff:b6 priority 32768 ifcost 0 port 0
+	bridge flags=1<VLANFILTER>
+	member: vtnet4 flags=1c7<LEARNING,DISCOVER,STP,AUTOEDGE,PTP,AUTOPTP>
+	        port 5 priority 128 path cost 2000 proto rstp
+	        role designated state forwarding untagged 1 tagged 10,20
+	member: vtnet2 flags=1e7<LEARNING,DISCOVER,STP,EDGE,AUTOEDGE,PTP,AUTOPTP>
+	        ifmaxaddr 10 port 3 priority 128 path cost 2000 proto rstp
+	        role designated state forwarding untagged 10
+	member: vtnet1 flags=3<LEARNING,DISCOVER>
+	        port 2 priority 128 path cost 2000 untagged 1
+	member: vtnet3 flags=8<SPAN>
+	        port 4 priority 128 path cost 2000
+	groups: bridge
+	nd6 options=9<PERFORMNUD,IFDISABLED>
+	drivername: bridge0
+bridge0.99: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	options=0
+	ether 58:9c:fc:10:ff:b6
+	inet 10.99.0.2 netmask 0xffffff00 broadcast 10.99.0.255
+	groups: vlan
+	vlan: 99 vlanproto: 802.1q vlanpcp: 0 parent interface: bridge0
+	media: Ethernet autoselect
+	status: active
+	nd6 options=29<PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL>
+	drivername: vlan0
+epair0a: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+	options=8<VLAN_MTU>
+	ether 02:6f:7a:00:00:0a
+	media: Ethernet 10Gbase-T (10Gbase-T <full-duplex>)
+	status: active
+	groups: epair
+	drivername: epair0a

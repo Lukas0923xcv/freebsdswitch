@@ -1,0 +1,10 @@
+/build/
+/dist/
+/web/node_modules/
+/web/dist/
+/tests/e2e/node_modules/
+/tests/e2e/test-results/
+/tests/e2e/playwright-report/
+/iso/work/
+*.iso
+*.img
