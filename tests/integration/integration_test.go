@@ -280,13 +280,19 @@ func TestLACP(t *testing.T) {
 	if active != 2 {
 		t.Fatalf("expected 2 distributing LACP members: %+v", lags)
 	}
-	// one member down: traffic continues on the other
-	sh(t, "ifconfig "+m1+" down")
-	defer exec.Command("ifconfig", m1, "up").Run()
-	// Both ends use LACP fast timeout (1 s PDUs, 3 s expiry). epair does
-	// not propagate link state, so the partner (jail) runs lacp_strict:
-	// without it FreeBSD keeps using a member that has lost its LACP partner.
-	eventually(t, "LACP with one member down", "h5", "10.1.0.6", true, 45*time.Second)
+	// Cut one link: destroying the epair removes the member on both ends,
+	// like a pulled cable. (ifconfig down would only clear IFF_UP; epair
+	// keeps reporting link up, so neither lagg would notice.)
+	sh(t, "ifconfig "+m1+" destroy")
+	t.Cleanup(func() {
+		if t.Failed() {
+			for _, cmd := range []string{"ifconfig lagg7", "jexec bswlab_h6 ifconfig -v lagg0", "ifconfig bridge77 addr"} {
+				out, _ := exec.Command("sh", "-c", cmd).CombinedOutput()
+				t.Logf("%s:\n%s", cmd, out)
+			}
+		}
+	})
+	eventually(t, "LACP with one link cut", "h5", "10.1.0.6", true, 30*time.Second)
 }
 
 func TestACLBlocksICMP(t *testing.T) {
