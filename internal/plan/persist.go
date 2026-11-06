@@ -11,6 +11,9 @@ import (
 // up reachable on its management address, with all switch ports down.
 // The bridge itself is deliberately *not* in rc.conf; bsdswitchd owns it.
 func PersistOps(c, prev *config.Config) []backend.Op {
+	if !config.Bool(c.System.ManageHost, true) {
+		return nil // the host's rc.conf is managed by someone else
+	}
 	m := c.Management
 	var ops []backend.Op
 	h := c.System.Hostname

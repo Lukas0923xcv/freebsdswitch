@@ -121,3 +121,21 @@ func TestFixedMediaAndUnmanagedHost(t *testing.T) {
 		t.Fatal("switch config must still be applied")
 	}
 }
+
+func TestPersistOpsUnmanagedHost(t *testing.T) {
+	c := parse(t, example)
+	if len(PersistOps(c, nil)) == 0 {
+		t.Fatal("managed host must persist rc.conf")
+	}
+	f := false
+	c.System.ManageHost = &f
+	if ops := PersistOps(c, nil); len(ops) != 0 {
+		t.Fatalf("unmanaged host must not touch rc.conf: %v", ops)
+	}
+}
+
+func TestMediaForWithoutAutoselect(t *testing.T) {
+	if _, ok := state.MediaFor([]string{"media 10Gbase-T mediaopt full-duplex"}, "auto", "auto"); ok {
+		t.Fatal("autoselect offered although the NIC does not support it")
+	}
+}

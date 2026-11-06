@@ -45,7 +45,7 @@ type Inventory interface {
 var (
 	// FreeBSD interface names: up to 15 characters (IFNAMSIZ 16), e.g. em0,
 	// epair0a, or renamed ones like "uplink".
-	ifNameRe   = regexp.MustCompile(`^[a-z][a-z0-9_]{0,14}$`)
+	ifNameRe   = regexp.MustCompile(`^` + IfNamePattern + `$`)
 	hostnameRe = regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`)
 	domainRe   = regexp.MustCompile(`^([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)*[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`)
 	vlanNameRe = regexp.MustCompile(`^[A-Za-z0-9_.\- ]{0,32}$`)
@@ -57,6 +57,10 @@ var (
 
 // ValidSpeeds lists speed settings understood by the media mapper.
 var ValidSpeeds = []string{"auto", "10", "100", "1000", "2500", "5000", "10000", "25000", "40000", "50000", "100000"}
+
+// IfNamePattern matches a FreeBSD interface name (unanchored, for reuse
+// in other patterns such as the privd allowlist).
+const IfNamePattern = `[a-z][a-z0-9_]{0,14}`
 
 // ValidIfName reports whether s is a syntactically valid interface name.
 func ValidIfName(s string) bool { return ifNameRe.MatchString(s) }

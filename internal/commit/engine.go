@@ -803,8 +803,8 @@ func (e *Engine) Boot(ctx context.Context, freshBoot bool, fallbackMgmt string) 
 	return fmt.Errorf("booted in safe mode: %w", err)
 }
 
-// SafeConfig keeps only the management interface settings of st (if
-// usable) and no switch ports.
+// SafeConfig keeps the management, system and bridge-level settings of st
+// (if usable) but no switch ports, VLAN memberships, LAGs or filters.
 func SafeConfig(st *config.Config, fallbackMgmt string) *config.Config {
 	mgmt := fallbackMgmt
 	if st != nil && st.Management.Interface != "" {

@@ -143,3 +143,14 @@ func TestPolicyEpairNames(t *testing.T) {
 		}
 	}
 }
+
+func TestSysrcInterfaceKeys(t *testing.T) {
+	for _, k := range []string{"ifconfig_em0", "ifconfig_epair0a_ipv6", "ifconfig_em0_alias0", "ifconfig_bridge0_99", "ifconfig_uplink"} {
+		if err := CheckOp(backend.Op{Argv: []string{"sysrc", k + "=up"}}); err != nil {
+			t.Errorf("%s: %v", k, err)
+		}
+	}
+	if err := CheckOp(backend.Op{Argv: []string{"sysrc", "ifconfig_Em0=up"}}); err == nil {
+		t.Error("invalid interface key accepted")
+	}
+}

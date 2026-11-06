@@ -33,64 +33,55 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: freebsd-binaries, path: build/bsdswitch-freebsd-* }
 
-  freebsd-pkg:
-    name: FreeBSD package (FreeBSD 15.1 VM)
+  freebsd:
+    name: FreeBSD 15.1 VM (${{ matrix.target }})
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [pkg, lab-test]   # package build / integration tests (epair + VNET jails)
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - name: build package in a FreeBSD VM
-        uses: vmactions/freebsd-vm@v1
+        with: { fetch-depth: 0 }   # git describe -> package version
+      - uses: vmactions/freebsd-vm@v1
         with:
           release: '15.1'
           usesh: true
           prepare: pkg install -y go git gmake
-          copyback: true
+          copyback: ${{ matrix.target == 'pkg' }}
           run: |
             set -e
             git config --global --add safe.directory "$PWD"
-            gmake build pkg
+            gmake build ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
+        if: matrix.target == 'pkg'
         with: { name: freebsd-pkg, path: dist/*.pkg }
-
-  freebsd-lab:
-    name: integration tests (epair + VNET jails, FreeBSD 15.1 VM)
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: integration tests in a FreeBSD VM
-        uses: vmactions/freebsd-vm@v1
-        with:
-          release: '15.1'
-          usesh: true
-          prepare: pkg install -y go git gmake
-          run: |
-            set -e
-            git config --global --add safe.directory "$PWD"
-            gmake lab-test
 
   iso:
     name: installer ISO
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-    needs: freebsd-pkg
+    # runs once the package exists, even if the integration tests failed
+    if: ${{ !cancelled() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
+    needs: freebsd
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { name: freebsd-pkg, path: dist }
-      - run: sudo apt-get update && sudo apt-get install -y xorriso
+      - run: sudo apt-get update && sudo apt-get install -y xorriso qemu-system-x86 ovmf
       - run: sudo sh iso/build-iso.sh -p "$(ls dist/bsdswitch-*.pkg | head -1)" -v 15.1 -o dist
-      - name: boot smoke test (UEFI, QEMU)
+      - name: boot smoke test (UEFI, QEMU) - stops as soon as the installer is up
         run: |
-          sudo apt-get install -y qemu-system-x86 ovmf
           sudo chmod a+r dist/*.iso
           cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
-          timeout 240 qemu-system-x86_64 -m 2048 -nographic -no-reboot \
+          qemu-system-x86_64 -m 2048 -display none -no-reboot \
             -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
             -drive if=pflash,format=raw,file=vars.fd \
-            -cdrom dist/*.iso -serial mon:stdio > boot.log 2>&1 || true
-          grep -a -E 'FreeBSD|Loading kernel|bsdinstall' boot.log | head -20
-          grep -a -q -E 'FreeBSD' boot.log
+            -cdrom dist/*.iso -serial file:boot.log &
+          qemu=$!
+          for i in $(seq 240); do grep -a -q 'Welcome to FreeBSD' boot.log 2>/dev/null && break; sleep 1; done
+          kill $qemu || true
+          grep -a -E 'EFI loader|FreeBSD 1[0-9]\.|Welcome to FreeBSD' boot.log | head -5
+          grep -a -q 'Welcome to FreeBSD' boot.log
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: boot-log, path: boot.log }

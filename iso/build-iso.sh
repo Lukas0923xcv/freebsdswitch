@@ -111,68 +111,65 @@ EOF
 
 ISO=$OUT/bsdswitch-$BSWVER-freebsd$VER-$ARCH.iso
 
-# ---- 3. remaster the ISO ---------------------------------------------------------------
+# ---- 3. extract the original media ---------------------------------------------------
+# The FreeBSD ISO's El Torito images are not files in the ISO tree, so the
+# boot records cannot simply be replayed: the tree is extracted, the
+# payload added, and a new ISO built with explicit BIOS (cdboot) and UEFI
+# (FAT image) boot entries.
+ROOT=$WORK/root
+EFIIMG=$WORK/efiboot.img
+rm -rf "$ROOT" "$WORK/bootimg" "$WORK/esp"
+mkdir -p "$ROOT" "$WORK/bootimg"
 if have xorriso; then
-	# The FreeBSD ISO's El Torito images are not files in the ISO tree,
-	# so they cannot simply be replayed: extract the tree and the boot
-	# images, add the payload and build a new ISO with explicit BIOS
-	# (cdboot) and UEFI (FAT image) boot entries.
-	msg "remastering ISO with xorriso"
-	ROOT=$WORK/root
-	rm -rf "$ROOT" "$WORK/bootimg"
-	mkdir -p "$ROOT" "$WORK/bootimg"
+	TOOL=xorriso
+	msg "extracting the ISO with xorriso"
 	[ "$(id -u)" = 0 ] || echo "note: not root, files on the ISO will not be owned by root (run with sudo)"
-	xorriso -osirrox on -indev "$WORK/$NAME-disc1.iso" -extract / "$ROOT" >/dev/null 2>&1
-	chmod -R u+w "$ROOT"
-	xorriso -osirrox on -indev "$WORK/$NAME-disc1.iso" -extract_boot_images "$WORK/bootimg/" 2>&1 | grep -v '^xorriso : UPDATE' || true
-	EFIIMG=$(ls "$WORK"/bootimg/*uefi* 2>/dev/null | head -1)
-	[ -n "$EFIIMG" ] || { echo "no UEFI boot image found in the original ISO"; ls -l "$WORK/bootimg"; exit 1; }
-	cp "$EFIIMG" "$ROOT/boot/bsdswitch-efiboot.img"
-	cp -R "$PAY/bsdswitch" "$ROOT/"
-	cp "$PAY/etc/installerconfig" "$ROOT/etc/installerconfig"
-	LABEL=$(awk '$2 == "/" { sub("/dev/iso9660/", "", $1); print $1 }' "$ROOT/etc/fstab")
-	[ -n "$LABEL" ] || { echo "cannot determine the volume label from /etc/fstab"; exit 1; }
-	rm -f "$ISO"
-	if [ "$ARCH" = amd64 ]; then
-		LOADSZ=$(( ($(wc -c < "$ROOT/boot/cdboot") + 511) / 512 ))
-		xorriso -as mkisofs -o "$ISO" -V "$LABEL" -R -publisher bsdswitch \
-			-c boot/boot.catalog \
-			-b boot/cdboot -no-emul-boot -boot-load-size "$LOADSZ" \
-			-eltorito-alt-boot -e boot/bsdswitch-efiboot.img -no-emul-boot \
-			"$ROOT"
-	else
-		xorriso -as mkisofs -o "$ISO" -V "$LABEL" -R -publisher bsdswitch \
-			-c boot/boot.catalog -e boot/bsdswitch-efiboot.img -no-emul-boot "$ROOT"
-	fi
-	msg "boot records of the new ISO"
-	xorriso -indev "$ISO" -report_el_torito plain 2>/dev/null | grep -i -E 'El Torito|boot img'
+	xorriso -osirrox on -indev "$WORK/$NAME-disc1.iso" -extract / "$ROOT" \
+		-extract_boot_images "$WORK/bootimg/" 2>&1 | grep -v -e '^xorriso : UPDATE' -e '^Extracted from ISO' || true
+	src=$(ls "$WORK"/bootimg/*uefi* 2>/dev/null | head -1)
+	[ -n "$src" ] || { echo "no UEFI boot image found in the original ISO"; ls -l "$WORK/bootimg"; exit 1; }
+	cp "$src" "$EFIIMG"
 elif [ "$(uname -s)" = FreeBSD ]; then
-	msg "remastering ISO with makefs (base system tools)"
-	ROOT=$WORK/root
-	rm -rf "$ROOT"; mkdir -p "$ROOT"
+	TOOL=makefs
+	msg "extracting the ISO with tar (base system tools)"
 	tar -xf "$WORK/$NAME-disc1.iso" -C "$ROOT"
-	cp -R "$PAY/bsdswitch" "$ROOT/"
-	cp "$PAY/etc/installerconfig" "$ROOT/etc/installerconfig"
-	LABEL=$(awk '$2 == "/" { sub("/dev/iso9660/", "", $1); print $1 }' "$ROOT/etc/fstab")
-	ESP=$WORK/efiboot.img
-	rm -rf "$WORK/esp"; mkdir -p "$WORK/esp/EFI/BOOT"
-	if [ "$ARCH" = amd64 ]; then
-		cp "$ROOT/boot/loader.efi" "$WORK/esp/EFI/BOOT/BOOTX64.efi"
-	else
-		cp "$ROOT/boot/loader.efi" "$WORK/esp/EFI/BOOT/BOOTAA64.efi"
-	fi
-	makefs -t msdos -o fat_type=12 -o sectors_per_cluster=1 -o volume_label=EFISYS -s 2048k "$ESP" "$WORK/esp"
-	BOOT=""
-	[ "$ARCH" = amd64 ] && BOOT="-o bootimage=i386;$ROOT/boot/cdboot -o no-emul-boot"
-	BOOT="$BOOT -o bootimage=i386;$ESP -o no-emul-boot -o platformid=efi"
-	makefs -t cd9660 $BOOT -o rockridge -o label="$LABEL" -o publisher="bsdswitch" "$ISO" "$ROOT"
-	if [ "$ARCH" = amd64 ]; then
-		# make the ISO bootable from USB as well (hybrid GPT), like release/amd64/mkisoimages.sh
-		echo "note: hybrid USB boot not added in makefs mode; use the memstick image (-m) for USB"
-	fi
+	mkdir -p "$WORK/esp/EFI/BOOT"
+	efiname=BOOTX64.efi
+	[ "$ARCH" = arm64 ] && efiname=BOOTAA64.efi
+	cp "$ROOT/boot/loader.efi" "$WORK/esp/EFI/BOOT/$efiname"
+	makefs -t msdos -o fat_type=12 -o sectors_per_cluster=1 -o volume_label=EFISYS -s 2048k "$EFIIMG" "$WORK/esp"
 else
 	echo "need xorriso (Linux: apt install xorriso / FreeBSD: pkg install xorriso)"
 	exit 1
+fi
+chmod -R u+w "$ROOT"
+
+# ---- 4. add the payload --------------------------------------------------------------
+cp -R "$PAY/bsdswitch" "$ROOT/"
+cp "$PAY/etc/installerconfig" "$ROOT/etc/installerconfig"
+cp "$EFIIMG" "$ROOT/boot/bsdswitch-efiboot.img"
+# keep the original volume label so the live system's /etc/fstab still matches
+LABEL=$(awk '$2 == "/" { sub("/dev/iso9660/", "", $1); print $1 }' "$ROOT/etc/fstab")
+[ -n "$LABEL" ] || { echo "cannot determine the volume label from /etc/fstab"; exit 1; }
+
+# ---- 5. build the new ISO ----------------------------------------------------------------
+msg "building ISO with $TOOL"
+rm -f "$ISO"
+if [ $TOOL = xorriso ]; then
+	BIOS=""
+	if [ "$ARCH" = amd64 ]; then
+		LOADSZ=$(( ($(wc -c < "$ROOT/boot/cdboot") + 511) / 512 ))
+		BIOS="-b boot/cdboot -no-emul-boot -boot-load-size $LOADSZ -eltorito-alt-boot"
+	fi
+	xorriso -as mkisofs -o "$ISO" -V "$LABEL" -R -publisher bsdswitch -c boot/boot.catalog \
+		$BIOS -e boot/bsdswitch-efiboot.img -no-emul-boot "$ROOT"
+	xorriso -indev "$ISO" -report_el_torito plain 2>/dev/null | grep -i -E 'El Torito|boot img'
+else
+	BOOT=""
+	[ "$ARCH" = amd64 ] && BOOT="-o bootimage=i386;$ROOT/boot/cdboot -o no-emul-boot"
+	BOOT="$BOOT -o bootimage=i386;$EFIIMG -o no-emul-boot -o platformid=efi"
+	makefs -t cd9660 $BOOT -o rockridge -o label="$LABEL" -o publisher="bsdswitch" "$ISO" "$ROOT"
+	echo "note: hybrid USB boot is not added in makefs mode; use the memstick image (-m) for USB"
 fi
 ls -l "$ISO"
 
@@ -202,7 +199,7 @@ if [ $MEMSTICK = 1 ]; then
 	ls -l "$IMG"
 fi
 
-[ $KEEP = 1 ] || rm -rf "$WORK/root" "$WORK/payload" "$WORK/esp" "$WORK/mnt"
+[ $KEEP = 1 ] || rm -rf "$WORK/root" "$WORK/payload" "$WORK/esp" "$WORK/bootimg" "$WORK/mnt"
 msg "done"
 echo "Proxmox: upload $(basename "$ISO") to ISO storage and boot the VM from it."
 [ $MEMSTICK = 1 ] && echo "USB: dd if=<memstick.img> of=/dev/daX bs=1m conv=sync"

@@ -113,10 +113,10 @@ func Build(in Input) *Plan {
 	b.inband()
 	if config.Bool(in.Desired.System.ManageHost, true) {
 		b.routes()
-		b.services()
-	} else {
-		b.filters()
+		b.hostServices()
 	}
+	b.switchServices()
+	b.filters()
 	// drop empty sections
 	var secs []Section
 	for _, s := range b.plan.Sections {
@@ -816,7 +816,9 @@ func (b *builder) route(fam, cur, want string, dynamic bool) {
 
 // ---- services ------------------------------------------------------------------
 
-func (b *builder) services() {
+// hostServices converges settings of the host itself (skipped with
+// system.manage_host=false).
+func (b *builder) hostServices() {
 	c := b.in.Desired
 	b.section("System services")
 	s := c.System
@@ -853,11 +855,23 @@ func (b *builder) services() {
 			b.exec("sysrc", "sshd_enable=NO")
 		}
 	}
+}
+
+// wasEnabled reports whether a service was enabled in Prev (false at boot).
+func (b *builder) wasEnabled(f func(c *config.Config) bool) bool {
+	return b.in.Prev != nil && f(b.in.Prev)
+}
+
+// switchServices converges the switch's own services: remote syslog,
+// SNMP and LLDP.
+func (b *builder) switchServices() {
+	c := b.in.Desired
+	b.section("Switch services")
 	if b.prevChanged(func(c *config.Config) any { return c.Syslog.Servers }) && (b.in.Prev != nil || len(c.Syslog.Servers) > 0) {
 		b.op(backend.Op{Path: "/usr/local/etc/syslog.d/bsdswitch.conf", Content: SyslogConf(c)})
 		b.bestEffort("service", "syslogd", "restart")
 	}
-	if b.prevChanged(func(c *config.Config) any { return c.SNMP }) && (b.in.Prev != nil || c.SNMP.Enabled) {
+	if b.prevChanged(func(c *config.Config) any { return c.SNMP }) && (c.SNMP.Enabled || b.wasEnabled(func(c *config.Config) bool { return c.SNMP.Enabled })) {
 		if c.SNMP.Enabled {
 			b.op(backend.Op{Path: "/etc/snmpd.config", Content: SNMPConf(c)})
 			b.exec("sysrc", "bsnmpd_enable=YES")
@@ -867,7 +881,7 @@ func (b *builder) services() {
 			b.exec("sysrc", "bsnmpd_enable=NO")
 		}
 	}
-	if b.prevChanged(func(c *config.Config) any { return fmt.Sprint(c.LLDP, portNames(c)) }) && (b.in.Prev != nil || c.LLDP.Enabled) {
+	if b.prevChanged(func(c *config.Config) any { return fmt.Sprint(c.LLDP, portNames(c)) }) && (c.LLDP.Enabled || b.wasEnabled(func(c *config.Config) bool { return c.LLDP.Enabled })) {
 		if c.LLDP.Enabled {
 			b.op(backend.Op{Path: "/usr/local/etc/lldpd.conf", Content: LLDPConf(c)})
 			b.exec("sysrc", "lldpd_enable=YES")
@@ -877,7 +891,6 @@ func (b *builder) services() {
 			b.exec("sysrc", "lldpd_enable=NO")
 		}
 	}
-	b.filters()
 }
 
 func portNames(c *config.Config) []string {

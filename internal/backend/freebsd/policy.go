@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Lukas0923xcv/freebsdswitch/internal/backend"
+	"github.com/Lukas0923xcv/freebsdswitch/internal/config"
 )
 
 // Programs maps the command names used in plans to absolute paths.
@@ -33,11 +34,13 @@ var Programs = map[string]string{
 }
 
 var (
-	ifRe       = `[a-z][a-z0-9_]{0,14}(\.[0-9]{1,4})?`
-	ifOnlyRe   = regexp.MustCompile(`^` + ifRe + `$`)
-	argRe      = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./\-<> ()\[\]]*$`)
-	descRe     = regexp.MustCompile(`^[^\x00-\x1f"'\\` + "`" + `$;|&<>]{0,64}$`)
-	sysrcKeyRe = regexp.MustCompile(`^(ifconfig_` + ifRe + `(_ipv6|_alias[0-9]+)?|ifconfig_` + `[a-z][a-z0-9_]{0,14}_[0-9]+(_ipv6)?|defaultrouter|ipv6_defaultrouter|ipv6_activate_all_interfaces|hostname|sshd_enable|sshd_flags|ntpd_enable|ntpd_sync_on_start|bsnmpd_enable|lldpd_enable|pf_enable|pf_rules|dummynet_enable|syslogd_flags|cloned_interfaces|bsdswitchd_enable)$`)
+	ifRe     = config.IfNamePattern + `(\.[0-9]{1,4})?` // incl. vlan(4) children like bridge0.99
+	ifOnlyRe = regexp.MustCompile(`^` + ifRe + `$`)
+	argRe    = regexp.MustCompile(`^[A-Za-z0-9_@%+=:,./\-<> ()\[\]]*$`)
+	descRe   = regexp.MustCompile(`^[^\x00-\x1f"'\\` + "`" + `$;|&<>]{0,64}$`)
+	// rc.conf ifconfig_* keys: interface name (possibly followed by
+	// _ipv6, _aliasN or a vlan suffix such as _99)
+	sysrcKeyRe = regexp.MustCompile(`^(ifconfig_` + config.IfNamePattern + `(_[0-9]{1,4})?(_ipv6|_alias[0-9]+)?|defaultrouter|ipv6_defaultrouter|ipv6_activate_all_interfaces|hostname|sshd_enable|sshd_flags|ntpd_enable|ntpd_sync_on_start|bsnmpd_enable|lldpd_enable|pf_enable|pf_rules|dummynet_enable|syslogd_flags|cloned_interfaces|bsdswitchd_enable)$`)
 	services   = map[string]bool{"sshd": true, "ntpd": true, "bsnmpd": true, "lldpd": true, "syslogd": true, "pf": true, "dhclient": true, "bsdswitchd": true}
 	svcActions = map[string]bool{"start": true, "stop": true, "restart": true, "reload": true, "onestart": true, "onestop": true, "onerestart": true, "status": true}
 )

@@ -125,7 +125,12 @@ func MediaSpeed(s string) int {
 // "mediaopt","full-duplex"]. ok=false if unsupported.
 func MediaFor(supported []string, speed, duplex string) ([]string, bool) {
 	if speed == "auto" || speed == "" {
-		return []string{"media", "autoselect"}, true
+		for _, m := range supported {
+			if strings.TrimSpace(m) == "media autoselect" {
+				return []string{"media", "autoselect"}, true
+			}
+		}
+		return nil, false
 	}
 	want, _ := strconv.Atoi(speed)
 	var fallback []string
