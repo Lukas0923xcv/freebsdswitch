@@ -284,15 +284,18 @@ func TestLACP(t *testing.T) {
 	// like a pulled cable. (ifconfig down would only clear IFF_UP; epair
 	// keeps reporting link up, so neither lagg would notice.)
 	sh(t, "ifconfig "+m1+" destroy")
-	t.Cleanup(func() {
+	// registered after the cancel defer, so it runs before the rollback
+	defer func() {
 		if t.Failed() {
-			for _, cmd := range []string{"ifconfig lagg7", "jexec bswlab_h6 ifconfig -v lagg0", "ifconfig bridge77 addr"} {
+			for _, cmd := range []string{"ifconfig -v lagg7", "ifconfig bridge77", "ifconfig bridge77 addr", "jexec bswlab_h6 ifconfig -v lagg0"} {
 				out, _ := exec.Command("sh", "-c", cmd).CombinedOutput()
 				t.Logf("%s:\n%s", cmd, out)
 			}
 		}
-	})
-	eventually(t, "LACP with one link cut", "h5", "10.1.0.6", true, 30*time.Second)
+	}()
+	// losing a member changes the bundle's path cost, so RSTP may take
+	// up to 2x forward delay (30 s) to forward again without an RSTP peer
+	eventually(t, "LACP with one link cut", "h5", "10.1.0.6", true, 60*time.Second)
 }
 
 func TestACLBlocksICMP(t *testing.T) {
