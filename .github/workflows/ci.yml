@@ -69,7 +69,7 @@ jobs:
         with: { name: freebsd-pkg, path: dist }
       - run: sudo apt-get update && sudo apt-get install -y xorriso qemu-system-x86 ovmf
       - run: sudo sh iso/build-iso.sh -p "$(ls dist/bsdswitch-*.pkg | head -1)" -v 15.1 -o dist
-      - name: boot smoke test (UEFI, QEMU) - stops as soon as the installer is up
+      - name: boot smoke test (UEFI, QEMU) - stops once the kernel has booted
         run: |
           sudo chmod a+r dist/*.iso
           cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
@@ -78,10 +78,13 @@ jobs:
             -drive if=pflash,format=raw,file=vars.fd \
             -cdrom dist/*.iso -serial file:boot.log &
           qemu=$!
-          for i in $(seq 240); do grep -a -q 'Welcome to FreeBSD' boot.log 2>/dev/null && break; sleep 1; done
+          # the kernel banner proves the kernel booted ("Welcome to FreeBSD"
+          # is already printed by the loader menu)
+          for i in $(seq 300); do grep -a -q 'The FreeBSD Project' boot.log 2>/dev/null && break; sleep 1; done
+          sleep 20   # let it continue towards the installer for the log
           kill $qemu || true
-          grep -a -E 'EFI loader|FreeBSD 1[0-9]\.|Welcome to FreeBSD' boot.log | head -5
-          grep -a -q 'Welcome to FreeBSD' boot.log
+          grep -a -E 'EFI loader|Copyright|FreeBSD 1[0-9]\.[0-9]-RELEASE|Welcome to FreeBSD' boot.log | head -8
+          grep -a -q 'The FreeBSD Project' boot.log
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: boot-log, path: boot.log }
