@@ -283,7 +283,9 @@ func TestLACP(t *testing.T) {
 	// one member down: traffic continues on the other
 	sh(t, "ifconfig "+m1+" down")
 	defer exec.Command("ifconfig", m1, "up").Run()
-	// both ends use LACP fast timeout (1 s PDUs, 3 s expiry)
+	// Both ends use LACP fast timeout (1 s PDUs, 3 s expiry). epair does
+	// not propagate link state, so the partner (jail) runs lacp_strict:
+	// without it FreeBSD keeps using a member that has lost its LACP partner.
 	eventually(t, "LACP with one member down", "h5", "10.1.0.6", true, 45*time.Second)
 }
 
